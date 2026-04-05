@@ -3,316 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>全息交互个人作品集 | iPhone 17 终极适配</title>
+    <title>范精灵 FANN | 资深视觉设计专家 作品集</title>
     
     <style>
         /* ==========================================
-           1. 全局流式排版 & 物理防抖层
+           1. 全局设计规范 & 极简流式排版
         ========================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Orbitron:wght@500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=Orbitron:wght@500;700;900&display=swap');
         
-        :root { --safe-top: env(safe-area-inset-top, 20px); --safe-bottom: env(safe-area-inset-bottom, 20px); }
+        :root { --safe-top: env(safe-area-inset-top, 20px); --safe-bottom: env(safe-area-inset-bottom, 20px); --primary: #00f0ff; --accent: #ff0055; --bg: #050508; }
         
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        body, html {
-            background-color: #020308; color: #ffffff;
-            font-family: 'Noto Sans SC', sans-serif;
-            overflow-x: hidden; overflow-y: auto; 
-            /* 禁用原生反弹，保证 GSAP 计算精确度 */
-            overscroll-behavior-y: none; -webkit-overflow-scrolling: touch;
-        }
-        
+        body, html { background-color: var(--bg); color: #ffffff; font-family: 'Noto Sans SC', sans-serif; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; }
         ::-webkit-scrollbar { display: none; }
 
-        /* 科幻加载屏 */
-        #loader { position: fixed; inset: 0; background: #020308; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease; }
-        .loader-text { font-family: 'Orbitron'; font-size: clamp(1.2rem, 5vw, 2.5rem); color: #00f0ff; letter-spacing: 5px; text-shadow: 0 0 20px rgba(0,240,255,0.8); }
-        .loader-bar { width: 200px; height: 2px; background: rgba(0,240,255,0.2); margin-top: 20px; overflow: hidden; }
-        .loader-progress { width: 0%; height: 100%; background: #00f0ff; animation: load 1.5s ease-out forwards; }
-        @keyframes load { to { width: 100%; } }
+        /* 噪点质感背景 */
+        .noise-bg { position: fixed; inset: 0; z-index: 990; pointer-events: none; opacity: 0.04; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E'); }
+        
+        /* 提示 Toast */
+        #toast { position: fixed; top: 10svh; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,240,255,0.2); border: 1px solid var(--primary); backdrop-filter: blur(10px); color: var(--primary); padding: 10px 20px; border-radius: 30px; font-weight: bold; opacity: 0; pointer-events: none; z-index: 99999; transition: 0.3s; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* 扫描线与星空画布 */
-        .scanlines { position: fixed; inset: 0; z-index: 990; pointer-events: none; background: linear-gradient(to bottom, transparent 50%, rgba(0,240,255,0.03) 50%); background-size: 100% 4px; }
-        #meteor-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
+        /* WebGL 底层 */
+        #webgl-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
         .content-layer { position: relative; z-index: 10; }
 
-        /* 赛博朋克风标题 */
-        .section-header { text-align: center; padding: 10svh 5vw 4svh 5vw; position: relative; z-index: 10; pointer-events: none;}
-        .section-header h2 { font-size: clamp(2.2rem, 9vw, 4.5rem); color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.8); font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;}
-        .section-header p { font-family: 'Orbitron'; color: #00f0ff; font-size: clamp(0.9rem, 3.5vw, 1.2rem); letter-spacing: 4px; text-transform: uppercase;}
-
-        /* HUD 科技角标装饰 */
-        .hud-border { position: absolute; inset: 0; pointer-events: none; border: 1px solid rgba(0,240,255,0.1); border-radius: 20px; }
-        .hud-border::before, .hud-border::after { content: ''; position: absolute; width: 30px; height: 30px; border: 2px solid #00f0ff; }
-        .hud-border::before { top: -1px; left: -1px; border-right: none; border-bottom: none; border-top-left-radius: 20px; }
-        .hud-border::after { bottom: -1px; right: -1px; border-left: none; border-top: none; border-bottom-right-radius: 20px; }
+        .section-header { margin-bottom: 5svh; }
+        .section-header h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(2.5rem, 8vw, 4.5rem); color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.5); position: relative;}
+        .section-header h2::before { content: attr(data-text); position: absolute; left: 0; top: 0; color: #fff; width: 0; overflow: hidden; white-space: nowrap; -webkit-text-stroke: 0px; transition: width 1s cubic-bezier(0.77, 0, 0.175, 1); }
+        .section-header.active h2::before { width: 100%; }
+        .section-header h3 { font-size: clamp(1.2rem, 5vw, 2rem); font-weight: 900; margin-top: 10px; color: var(--primary); }
+        .section-desc { font-size: clamp(0.95rem, 4vw, 1.1rem); color: #a0b0c0; line-height: 1.8; margin-top: 20px; max-width: 600px; }
 
         /* ==========================================
-           2. 开场个人全息 ID 卡
+           2. Hero 首屏：个人定位与液态粒子球
         ========================================== */
-        .hero-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; perspective: 1500px; overflow: hidden; }
-        
-        .hologram-card {
-            position: relative; width: 85vw; max-width: 450px; padding: 6svh 6vw; z-index: 10;
-            background: rgba(5, 10, 20, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,240,255,0.15);
-            display: flex; flex-direction: column; align-items: center;
-            transform-style: preserve-3d;
-        }
-        
-        .profile-img { width: clamp(120px, 35vw, 160px); height: clamp(120px, 35vw, 160px); border-radius: 50%; background: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80') center/cover; border: 3px solid #00f0ff; box-shadow: 0 0 30px rgba(0,240,255,0.6); transform: translateZ(60px); margin-bottom: 20px; }
-        .profile-name { font-size: clamp(2rem, 8vw, 3rem); font-weight: 900; color: #fff; transform: translateZ(80px); text-shadow: 0 0 10px rgba(255,255,255,0.5); letter-spacing: 2px;}
-        .profile-title { font-family: 'Orbitron'; font-size: clamp(0.9rem, 4vw, 1.2rem); color: #ff0055; font-weight: 700; transform: translateZ(50px); letter-spacing: 3px; margin-bottom: 20px; margin-top: 5px;}
-        .profile-desc { text-align: center; color: #b0c4de; font-size: clamp(0.9rem, 3.5vw, 1.1rem); line-height: 1.8; transform: translateZ(30px); }
-
-        .floating-tag { position: absolute; padding: 6px 15px; background: rgba(0,240,255,0.1); border: 1px solid #00f0ff; color: #00f0ff; border-radius: 30px; font-weight: bold; font-size: clamp(0.7rem, 3vw, 0.9rem); transform: translateZ(90px); box-shadow: 0 0 15px rgba(0,240,255,0.4); }
-        .tag-1 { top: 8%; left: -5%; } .tag-2 { bottom: 12%; right: -5%; border-color: #ff0055; color: #ff0055; background: rgba(255,0,85,0.1); box-shadow: 0 0 15px rgba(255,0,85,0.4);}
+        .hero-section { height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 0 8vw; position: relative; }
+        .hero-content { max-width: 800px; z-index: 2; pointer-events: none; }
+        .hero-title { font-size: clamp(3rem, 12vw, 6rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px; text-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .hero-subtitle { font-family: 'Orbitron'; color: var(--primary); font-size: clamp(1.2rem, 5vw, 2rem); font-weight: 700; letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase;}
+        .hero-bio { font-size: clamp(1rem, 4.5vw, 1.2rem); color: #c0d0e0; line-height: 1.8; max-width: 600px; background: rgba(5,5,10,0.4); padding: 30px; border-left: 4px solid var(--primary); backdrop-filter: blur(10px); border-radius: 0 20px 20px 0; }
 
         /* ==========================================
-           3. Project 1: 同屏 5 卡片视差画廊 (支持横向滑动)
+           3. 01 情绪共振 (Pingu 视差)
         ========================================== */
-        .coverflow-section { height: 100svh; width: 100vw; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: pan-y; }
-        .gallery-container { position: relative; width: 100%; height: 100%; perspective: 1200px; transform-style: preserve-3d; }
+        .pingu-section { min-height: 120svh; padding: 15svh 8vw; position: relative; overflow: hidden; }
+        .pingu-wrapper { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 10svh; gap: 5vw;}
+        .pingu-text { flex: 1; min-width: 300px; max-width: 500px; z-index: 5; }
         
-        .cover-card { 
+        .pingu-visuals { flex: 1; min-width: 300px; height: 60vh; position: relative; perspective: 1000px; }
+        /* 使用高质量图片作为视差元素 */
+        .coffee-cup { position: absolute; width: 60%; right: 10%; top: 20%; z-index: 3; filter: drop-shadow(0 30px 30px rgba(0,0,0,0.8)); will-change: transform; border-radius: 20px;}
+        .pingu-ice { position: absolute; width: 30%; left: 0%; bottom: 10%; z-index: 4; filter: drop-shadow(0 20px 20px rgba(0,240,255,0.4)); will-change: transform; border-radius: 20px;}
+        .pingu-bg { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80') center/cover; border-radius: 30px; z-index: 1; opacity: 0.4; }
+
+        /* ==========================================
+           4. 02 商业包装 (3D 爆炸拆解)
+        ========================================== */
+        .packaging-section { min-height: 150svh; padding: 15svh 8vw; position: relative; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 3D 盒子爆炸容器 */
+        .box-scene { width: 100%; max-width: 400px; height: 500px; perspective: 1500px; margin-top: 10svh; position: relative; display: flex; justify-content: center; align-items: center;}
+        .box-wrapper { position: relative; width: 250px; height: 350px; transform-style: preserve-3d; will-change: transform; }
+        
+        /* 三层包装解构 */
+        .box-layer { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.9); transform-style: preserve-3d; }
+        /* 外盒 (极简黑金) */
+        .layer-outer { background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'); z-index: 3; border: 1px solid rgba(255,255,255,0.1); opacity: 0.9;}
+        /* 金箔工艺层 */
+        .layer-foil { background: linear-gradient(135deg, #d4af37, #aa7700); mix-blend-mode: color-dodge; z-index: 2; opacity: 0.7; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.5);}
+        /* 内衬 (细腻插画) */
+        .layer-inner { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'); z-index: 1; filter: brightness(1.2); }
+
+        /* ==========================================
+           5. 03 双生语境 (左右拖拽视差)
+        ========================================== */
+        .split-section { height: 100svh; width: 100vw; position: relative; overflow: hidden; display: flex; touch-action: none;}
+        /* 拖拽指示器 */
+        .split-handle { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(255,255,255,0.5); z-index: 30; cursor: ew-resize; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;}
+        .split-handle::after { content: '◀ 拖拽 ▶'; position: absolute; background: #fff; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-family: 'Noto Sans SC'; white-space: nowrap; font-size: 0.9rem;}
+        
+        .split-panel { position: absolute; top: 0; bottom: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 10vw; color: #fff; }
+        
+        /* 左侧：夏日多巴胺 (暖色) */
+        .panel-left { left: 0; width: 50%; background: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1200&q=80') center/cover; z-index: 20; border-right: 2px solid #fff; }
+        .panel-left::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,157,0,0.8), rgba(255,100,0,0.4)); z-index: -1;}
+        
+        /* 右侧：深海静谧 (冷色) */
+        .panel-right { right: 0; width: 100%; background: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1200&q=80') center/cover; z-index: 10; }
+        .panel-right::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,20,50,0.9), rgba(0,240,255,0.4)); z-index: -1;}
+        
+        .split-content h3 { font-family: 'Orbitron'; font-size: clamp(2rem, 8vw, 4rem); text-shadow: 0 5px 20px rgba(0,0,0,0.8); margin-bottom: 10px; line-height: 1.1;}
+        .split-content p { font-size: clamp(1rem, 4vw, 1.2rem); max-width: 400px; line-height: 1.8; text-shadow: 0 2px 10px rgba(0,0,0,0.8);}
+
+        /* ==========================================
+           6. 04 万象共生 (Z轴时光隧道)
+        ========================================== */
+        .tunnel-section { height: 300svh; position: relative; background: #020308; }
+        .tunnel-sticky { position: sticky; top: 0; height: 100svh; width: 100vw; overflow: hidden; perspective: 1500px; display: flex; align-items: center; justify-content: center; }
+        .tunnel-container { position: absolute; width: 100%; height: 100%; transform-style: preserve-3d; }
+        
+        .tunnel-card {
             position: absolute; left: 50%; top: 50%;
-            /* 移动端卡片缩放比例 */
-            width: clamp(160px, 45vw, 280px); height: clamp(240px, 65vw, 420px); 
-            background-size: cover; background-position: center; 
-            border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,240,255,0.3); 
-            cursor: pointer; will-change: transform, opacity;
-            /* 保证从中心点进行 3D 旋转计算 */
+            width: clamp(260px, 70vw, 400px); height: clamp(380px, 100vw, 600px);
+            background-size: cover; background-position: center; border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
             transform-origin: center center;
-            /* 初始状态通过 JS 动态赋予 */
+            /* 色散模糊初始值 */
+            filter: drop-shadow(0 0 0 red) drop-shadow(0 0 0 blue);
+            will-change: transform, filter;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        /* 未激活卡片加深遮罩 */
-        .cover-card::after { content: ''; position: absolute; inset: 0; background: #000; opacity: 0.5; border-radius: 15px; transition: opacity 0.3s; pointer-events: none;}
-        .cover-card.active::after { opacity: 0; }
+        /* 为每张卡片准备高饱和海报图片 */
+        .t-card-1 { background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80'); }
+        .t-card-2 { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'); }
+        .t-card-3 { background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'); }
+        .t-card-4 { background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80'); }
 
         /* ==========================================
-           4. Project 2: 空间碎片飞入
+           7. 尾屏：3D 悬浮信封 (Footer)
         ========================================== */
-        .features-section { padding: 5svh 5vw 10svh 5vw; perspective: 1000px; overflow: hidden; }
-        .glass-panel { position: relative; background: rgba(10, 15, 30, 0.5); border: 1px solid rgba(255, 0, 85, 0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 8vw; margin-bottom: 5svh; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        .glass-panel h3 { font-size: clamp(1.5rem, 7vw, 2.5rem); margin-bottom: 10px; color: #ff0055; font-weight: 900;}
-        .glass-panel p { color: #a0b0c0; font-size: clamp(0.95rem, 4vw, 1.2rem); line-height: 1.8; }
-
-        /* ==========================================
-           5. Project 3: 磁力全息矩阵 (防溢出，丝滑阻尼)
-        ========================================== */
-        .magnetic-section { padding: 5svh 0 10svh 0; perspective: 1200px; display: flex; justify-content: center; }
-        .grid-container { 
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 4vw; 
-            width: 85vw; max-width: 500px; transform-style: preserve-3d; 
-        }
-        .grid-item { 
-            aspect-ratio: 1 / 1; width: 100%; border-radius: 15px; 
-            background-size: cover; background-position: center; position: relative; 
-            transform-style: preserve-3d; box-shadow: 0 15px 30px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.2); 
-            will-change: transform; cursor: pointer;
-        }
-        .grid-item::before { content: ''; position: absolute; inset: 0; border-radius: 15px; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)); pointer-events: none;}
-        .grid-inner-text { 
-            position: absolute; bottom: 10px; right: 10px; background: rgba(255,0,85,0.9); 
-            padding: 5px 12px; border-radius: 8px; font-weight: 900; 
-            font-size: clamp(0.7rem, 3vw, 1.1rem); transform: translateZ(40px); pointer-events: none; 
-        }
-
-        /* ==========================================
-           6. Project 4: 3D 轨道星环 (支持横向滑动)
-        ========================================== */
-        .orbital-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; touch-action: pan-y; }
-        .ring-wrapper { perspective: 1500px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; }
-        .ring { position: relative; width: clamp(180px, 45vw, 250px); height: clamp(260px, 65vw, 380px); transform-style: preserve-3d; }
-        .ring-card { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.3); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
-
-        /* ==========================================
-           7. Project 5: 视差堆叠
-        ========================================== */
-        .stack-section { padding: 5svh 5vw 20svh 5vw; position: relative; }
-        .stack-card { 
-            position: sticky; top: calc(var(--safe-top) + 10svh); 
-            height: 60svh; width: 100%; border-radius: 20px; background-size: cover; background-position: center; 
-            margin-bottom: 4svh; box-shadow: 0 -15px 40px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.2); 
-            display: flex; align-items: flex-end; padding: 6vw; transform-origin: top center; overflow: hidden;
-            will-change: transform, opacity; cursor: pointer;
-        }
-        .stack-card h3 { position: relative; z-index: 2; font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 900; color: #fff; text-shadow: 0 5px 15px #000; line-height: 1.1;}
-        .stack-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); pointer-events: none;}
-
-        /* ==========================================
-           8. Project 6: Hover 探照名片
-        ========================================== */
-        .contact-section { height: 100svh; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; touch-action: pan-y; }
-        .contact-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a1128 0%, #010103 100%); -webkit-mask-image: radial-gradient(circle clamp(120px, 35vw, 250px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); mask-image: radial-gradient(circle clamp(120px, 35vw, 250px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); pointer-events: none;}
-        .contact-title { font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; color: #fff; text-shadow: 0 0 20px #00f0ff; margin-bottom: 10px; text-align: center; }
-        .contact-email { font-family: 'Orbitron'; font-size: clamp(1.2rem, 5vw, 2.5rem); color: #ff0055; border-bottom: 2px solid #ff0055; padding-bottom: 5px; margin-bottom: 30px; text-shadow: 0 0 15px #ff0055; }
-        .contact-hint { position: absolute; font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 900; color: rgba(255,255,255,0.08); pointer-events: none; text-align: center; width: 100%;}
-
-        /* ==========================================
-           9. 高定版长图文详情页 Modal (超级沉浸式)
-        ========================================== */
-        #unfold-modal {
-            position: fixed; inset: 0; background: #020308; z-index: 100000;
-            clip-path: inset(50% 0 50% 0); -webkit-clip-path: inset(50% 0 50% 0);
-            transition: clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1), -webkit-clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1);
-            display: block; overflow-y: auto; overflow-x: hidden; opacity: 0; pointer-events: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        #unfold-modal.active { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); opacity: 1; pointer-events: auto; }
-
-        /* 优雅的关闭按钮 */
-        .modal-close-btn { 
-            position: fixed; top: var(--safe-top); right: 5vw; margin-top: 10px; font-size: 0.9rem; color: #fff; 
-            cursor: pointer; z-index: 100001; font-weight: bold; letter-spacing: 1px;
-            background: rgba(255, 0, 85, 0.8); padding: 8px 18px; border-radius: 30px; 
-            box-shadow: 0 5px 15px rgba(255,0,85,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        }
+        .footer-section { height: 100svh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #0a1128 0%, #020308 80%); perspective: 1200px; overflow: hidden;}
         
-        .modal-hero { height: 40svh; width: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 6vw; position: relative; }
-        .modal-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #020308 0%, transparent 80%); }
-        .modal-title-huge { font-size: clamp(2rem, 9vw, 4rem); font-weight: 900; color: #fff; position: relative; z-index: 2; text-shadow: 0 5px 15px rgba(0,0,0,0.8); line-height: 1.1; }
+        .footer-quote { font-family: 'Orbitron'; font-size: clamp(1.5rem, 6vw, 3rem); text-align: center; color: #fff; margin-bottom: 5svh; font-weight: 900; text-shadow: 0 0 20px rgba(0,240,255,0.5);}
+        .footer-quote span { color: var(--accent); display: block; margin-top: 10px; font-size: clamp(1rem, 4vw, 1.5rem); letter-spacing: 5px;}
+
+        /* CSS 3D 信封构建 */
+        .envelope-wrapper { width: clamp(280px, 80vw, 400px); height: clamp(180px, 50vw, 250px); position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
         
-        /* 详情页饱满的内容区 */
-        .modal-body { padding: 5svh 6vw calc(var(--safe-bottom) + 10svh) 6vw; max-width: 800px; margin: 0 auto; }
+        /* 悬浮/触摸时，信封微微仰起 */
+        .envelope-wrapper:hover, .envelope-wrapper.active { transform: rotateX(20deg) translateY(-20px); }
         
-        /* 数据与技术栈标签 */
-        .modal-metadata { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
-        .modal-tag { padding: 5px 12px; border: 1px solid #00f0ff; color: #00f0ff; border-radius: 20px; font-size: 0.8rem; font-family: 'Orbitron'; background: rgba(0,240,255,0.1); }
+        .env-part { position: absolute; inset: 0; background: rgba(20, 30, 50, 0.8); border: 1px solid var(--primary); border-radius: 10px; backdrop-filter: blur(10px); transform-style: preserve-3d; display: flex; justify-content: center; align-items: center;}
+        .env-back { transform: translateZ(-20px); box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        .env-front { transform: translateZ(20px); background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(255,0,85,0.1)); clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);}
         
-        .modal-desc-text { font-size: clamp(0.95rem, 4vw, 1.1rem); color: #b0c4de; line-height: 1.8; margin-bottom: 40px; border-left: 3px solid #00f0ff; padding-left: 15px; }
-        
-        .modal-gallery { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .modal-gallery img { width: 100%; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        /* 信封翻盖 (交互核心) */
+        .env-flap { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 60%; background: rgba(0,240,255,0.3); 
+            clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            z-index: 30; border-top: 2px solid var(--primary); backdrop-filter: blur(5px);
+        }
+        /* 打开翻盖 */
+        .envelope-wrapper:hover .env-flap, .envelope-wrapper.active .env-flap { transform: rotateX(180deg); }
+
+        /* 信封内部的信纸 (联系方式) */
+        .env-letter {
+            position: absolute; bottom: 10px; left: 5%; width: 90%; height: 90%; background: #fff; border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+            transform: translateZ(0px) translateY(0); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 15;
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.5);
+        }
+        /* 信纸抽出 */
+        .envelope-wrapper:hover .env-letter, .envelope-wrapper.active .env-letter { transform: translateZ(10px) translateY(-50%); }
+
+        .letter-text { color: #000; font-weight: 900; font-size: clamp(1rem, 4vw, 1.2rem); margin-bottom: 10px; text-align: center;}
+        .letter-btn { background: var(--accent); color: #fff; padding: 10px 20px; border-radius: 30px; font-weight: bold; border: none; font-family: 'Orbitron'; font-size: 1rem; box-shadow: 0 5px 15px rgba(255,0,85,0.4); margin-top: 10px;}
 
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="loader-text">SYSTEM INITIATING...</div>
-        <div class="loader-bar"><div class="loader-progress"></div></div>
+        <div class="loader-text">FANN.DESIGN ENGINE</div>
     </div>
     
     <div class="scanlines"></div>
-    <canvas id="meteor-canvas"></canvas>
+    <!-- WebGL 粒子爆裂背景 -->
+    <canvas id="webgl-canvas"></canvas>
 
     <div class="content-layer">
         
-        <!-- ==================== 1. 全息开场 ==================== -->
+        <!-- ==================== 1. Hero 个人简介 ==================== -->
         <section class="hero-section" id="hero-trigger">
-            <div class="hologram-card" id="holo-card">
-                <div class="hud-border"></div>
-                <div class="floating-tag tag-1">WEB3D 引擎</div>
-                <div class="floating-tag tag-2">极致适配</div>
-                <div class="profile-img"></div>
-                <div class="profile-name">全息交互视觉</div>
-                <div class="profile-title">NEXT-GEN DEVELOPER</div>
-                <div class="profile-desc">
-                    突破二维屏幕的物理束缚。<br>
-                    为你构建拥有顶级视觉张力、<br>
-                    极致丝滑手感的数字艺术空间。
+            <div class="hero-content">
+                <h1 class="hero-title">范精灵 (Fann)</h1>
+                <div class="hero-subtitle">资深视觉设计专家 / AI 视觉探索者</div>
+                <div class="hero-bio">
+                    深耕视觉设计领域 9 年，曾履职于劲嘉等包装与印刷行业头部企业。<br><br>
+                    我致力于打破传统二维平面的局限，将先锋的 AI 生成技术与深厚的商业逻辑深度融合。从快消品跨界营销到实体商业包装，以多维度的视觉感知重塑品牌价值，让每一次设计都成为驱动商业增长的视觉引擎。
                 </div>
             </div>
         </section>
 
-        <!-- ==================== 2. 同屏 5 卡 Coverflow ==================== -->
-        <div class="section-header"><h2>01 / 视差画廊</h2><p>SWIPE TO EXPLORE</p></div>
-        <!-- 增加 swipe-zone 类，激活滑动劫持引擎 -->
-        <div class="coverflow-section swipe-zone" id="coverflow-trigger">
-            <div class="gallery-container" id="gallery-track">
-                <!-- 通过绝对定位与中心点计算，展示完美的 5 卡片扇形 -->
-                <div class="cover-card" onclick="openRichModal('赛博核心', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="cover-card" onclick="openRichModal('数字引力', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="cover-card" onclick="openRichModal('深海声波', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="cover-card" onclick="openRichModal('空间跃迁', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80')"></div>
-                <div class="cover-card" onclick="openRichModal('夏日风暴', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80')"></div>
+        <!-- ==================== 2. 项目一：情绪共振 (Pingu 视差) ==================== -->
+        <section class="pingu-section">
+            <div class="section-header" data-trigger>
+                <h2 data-text="01 / CROSSOVER">01 / CROSSOVER</h2>
+                <h3>情绪共振：瑞幸咖啡 × Pingu 现象级联名</h3>
+                <div class="section-desc">提取 Pingu 的冰雪基因与搞怪天性，与瑞幸咖啡的年轻化调性深度碰撞。打通线上表情包与线下门店打卡的视觉闭环，实现品牌萌力的指数级传播。</div>
             </div>
-        </div>
 
-        <!-- ==================== 3. Z-Shatter ==================== -->
-        <div class="section-header" style="margin-top:5vh;"><h2>02 / 空间碎裂</h2><p>DEEP PARALLAX</p></div>
-        <div class="features-section">
-            <div class="glass-panel panel-fly">
-                <div class="hud-border"></div>
-                <h3 style="color: #ff0055;">深度跃迁引擎</h3>
-                <p>视觉面板不再是平铺于网页，而是伴随着滚动进度，从屏幕深处的 Z 轴空间直冲而出。</p>
+            <div class="pingu-wrapper">
+                <div class="pingu-text">
+                    <p style="color:#a0b0c0; font-size:1.1rem; line-height:2; margin-bottom: 20px;">
+                        <strong>设计策略：</strong> 全案主导从概念视觉到落地延展。为“冰摇企鹅椰椰”等爆款定制蓝白渐变的冰海视觉，并深度设计杯套、纸袋、随行杯及周边盲盒。
+                    </p>
+                </div>
+                <div class="pingu-visuals" id="pingu-scene">
+                    <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80" class="coffee-cup" alt="Coffee Cup">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" class="pingu-ice" alt="Pingu Element">
+                    <div class="pingu-bg"></div>
+                </div>
             </div>
-            <div class="glass-panel right panel-fly">
-                <div class="hud-border"></div>
-                <h3 style="color: #00f0ff;">次世代材质</h3>
-                <p>高级毛玻璃滤镜与底层浩瀚星空动态交融，打造前所未有的科幻拟物质感。</p>
-            </div>
-        </div>
+        </section>
 
-        <!-- ==================== 4. Magnetic 磁力矩阵 ==================== -->
-        <div class="section-header"><h2>03 / 磁性矩阵</h2><p>PHYSICS SENSOR</p></div>
-        <div class="magnetic-section">
-            <div class="grid-container">
-                <div class="grid-item mag-item" onclick="openRichModal('量子核心 A', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('量子核心 B', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('量子核心 C', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('量子核心 D', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
+        <!-- ==================== 3. 项目二：商业包装 (3D 爆炸拆解) ==================== -->
+        <section class="packaging-section">
+            <div class="section-header" data-trigger>
+                <h2 data-text="02 / CRAFTSMANSHIP">02 / CRAFTSMANSHIP</h2>
+                <h3>极致造物：重塑高溢价商业包装生态</h3>
+                <div class="section-desc">服务于重庆中烟、云南中烟及头部快消品牌，平衡创意美学与工业生产的可行性。</div>
             </div>
-        </div>
 
-        <!-- ==================== 5. Orbital Ring 星环 ==================== -->
-        <div class="section-header"><h2>04 / 全息星环</h2><p>ORBITAL DRAG</p></div>
-        <div class="orbital-section swipe-zone" id="orbital-trigger">
-            <div class="ring-wrapper">
-                <div class="ring" id="ring"></div>
+            <div style="max-width:800px; text-align:center; color:#a0b0c0; line-height:2; margin-bottom: 5svh; font-size:1.1rem;">
+                <strong>天子·重庆印象：</strong>以“夜色”为题，融合赛博朋克与传统元素，重绘重庆魔幻地标。<br>
+                <strong>手工插画重构：</strong>回归质朴，以精细的单色手绘刻画农耕画卷，赋予高端温度。
             </div>
-        </div>
 
-        <!-- ==================== 6. Parallax Stack ==================== -->
-        <div class="section-header"><h2>05 / 视差折叠</h2><p>STICKY FOLD</p></div>
-        <div class="stack-section">
-            <div class="stack-card" onclick="openRichModal('重力坍缩', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'); z-index: 1;"><h3>01 / 重力坍缩</h3></div>
-            <div class="stack-card" onclick="openRichModal('霓虹界限', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80'); z-index: 2;"><h3>02 / 霓虹界限</h3></div>
-            <div class="stack-card" onclick="openRichModal('代码深渊', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); z-index: 3;"><h3>03 / 代码深渊</h3></div>
-        </div>
-
-        <!-- ==================== 7. Footer 探照灯 ==================== -->
-        <div class="section-header" style="margin-bottom:0; z-index:20;"><h2>06 / 探索未知</h2><p>TOUCH TO REVEAL</p></div>
-        <div class="contact-section" id="contact-footer">
-            <div class="contact-hint">触摸照亮区域</div>
-            <div class="contact-content" id="contact-mask" style="--mx: 50%; --my: 50%;">
-                <h2 class="contact-title">连接未来</h2>
-                <div class="contact-email">system@web3d.dev</div>
+            <!-- CSS 3D 爆炸盒子 -->
+            <div class="box-scene" id="box-trigger">
+                <div class="box-wrapper" id="box-rotate">
+                    <div class="box-layer layer-inner" id="layer-3"></div>
+                    <div class="box-layer layer-foil" id="layer-2"></div>
+                    <div class="box-layer layer-outer" id="layer-1"></div>
+                </div>
             </div>
-        </div>
+            <p style="margin-top: 5svh; color: var(--primary); font-family: 'Orbitron'; font-weight:bold; letter-spacing: 2px;">SCROLL TO EXPLODE VIEW ↓</p>
+        </section>
+
+        <!-- ==================== 4. 项目三：双生语境 (滑动分割) ==================== -->
+        <section class="split-section" id="split-trigger">
+            <div class="panel-right split-panel">
+                <div class="split-content" style="margin-left: auto; text-align: right;">
+                    <h3>AURA VÉRONIQUE</h3>
+                    <p>舍弃多余修饰，以极简线条和细腻金属质感衬托天然珍珠的温润。以“月光”为核心意象，诠释“美藏于细微”的高端调性。</p>
+                </div>
+            </div>
+
+            <div class="panel-left split-panel" id="split-left">
+                <div class="split-content">
+                    <h3>BEANBOOM! COFFEE</h3>
+                    <p>提取“夏日、活力、海滩”关键词，高饱和度的视觉排版搭配美式复古贴纸风格，打造“释放能量”的街头咖啡文化。</p>
+                </div>
+            </div>
+            
+            <div class="split-handle" id="split-handle"></div>
+        </section>
+
+        <!-- ==================== 5. 项目四：万象共生 (Z轴隧道) ==================== -->
+        <section class="tunnel-section" id="tunnel-trigger">
+            <div class="tunnel-sticky">
+                <div class="section-header" style="position: absolute; top: 10svh; width: 100%;">
+                    <h2 data-text="04 / ECOSYSTEM">04 / ECOSYSTEM</h2>
+                    <h3>万象共生：生态构建与视觉张力</h3>
+                    <p style="color:#aaa; text-transform:none; letter-spacing: 1px;">PAW POP 宠物生态 / 奈雪的茶 / 混果汁</p>
+                </div>
+
+                <div class="tunnel-container" id="tunnel-container">
+                    <div class="tunnel-card t-card-1"></div>
+                    <div class="tunnel-card t-card-2"></div>
+                    <div class="tunnel-card t-card-3"></div>
+                    <div class="tunnel-card t-card-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 6. 尾屏：3D 悬浮信封 ==================== -->
+        <section class="footer-section">
+            <div class="footer-quote">
+                DESIGN WITH HEART.
+                <span>MAKE EACH ONE A LITTLE BETTER.</span>
+            </div>
+
+            <!-- 点击触发信封交互 -->
+            <div class="envelope-wrapper" id="envelope" onclick="copyContact()">
+                <div class="env-part env-back"></div>
+                <div class="env-letter">
+                    <div class="letter-text">659510446@qq.com</div>
+                    <div class="letter-text" style="color:var(--accent);">WeChat: FANNY6901</div>
+                    <button class="letter-btn">CLICK TO COPY</button>
+                </div>
+                <div class="env-part env-front"></div>
+                <div class="env-flap"></div>
+            </div>
+            <p style="margin-top: 5svh; color: #a0b0c0; letter-spacing: 2px;">期待与你共同探索下一个视觉边界。</p>
+        </section>
 
     </div>
 
-    <!-- ==================== 内容丰满的超级详情页 ==================== -->
-    <div id="unfold-modal">
-        <div class="modal-close-btn" onclick="closeModal()">✕ 关闭</div>
-        <div class="modal-hero" id="modal-hero">
-            <h1 class="modal-title-huge" id="modal-title">TITLE</h1>
-        </div>
-        <div class="modal-body">
-            <!-- 增加高级科技标签 -->
-            <div class="modal-metadata">
-                <div class="modal-tag">THREE.JS</div>
-                <div class="modal-tag">WEBGL SHADER</div>
-                <div class="modal-tag">GSAP ENGINE</div>
-            </div>
-            
-            <p class="modal-desc-text">
-                <strong>这是一个完美适配 iPhone 的沉浸式多图详情页。</strong><br><br>
-                你可以像浏览原生 App 一样向下滑动。采用动态视口高度 (svh) 计算，文字比例通过 clamp 函数自动响应流式布局，彻底消除了排版溢出与滚动卡顿。底部的多图阵列在移动端会自动转化为舒适的单列大图瀑布流。
-            </p>
-            
-            <div class="modal-gallery">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
-                <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
-                <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
-            </div>
-        </div>
-    </div>
+    <div id="toast">✅ 联系方式已复制到剪贴板</div>
 
-    <!-- 核心动画库 -->
+    <!-- 核心库 -->
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
 
@@ -324,228 +308,212 @@
                 document.getElementById('loader').style.opacity = 0;
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
-                    initMeteorUniverse();
+                    initWebGLHero();
                     initGSAPAnimations();   
                 }, 600);
             }, 1000);
         };
 
         // =========================================
-        // 🌟 物理引擎：浩瀚星空与流星雨
+        // 🌟 1. WebGL 核心：液态金属粒子爆裂 (Hero)
         // =========================================
-        function initMeteorUniverse() {
-            const canvas = document.getElementById('meteor-canvas');
-            const ctx = canvas.getContext('2d');
-            let w = canvas.width = window.innerWidth;
-            let h = canvas.height = window.innerHeight;
+        function initWebGLHero() {
+            try {
+                if(typeof THREE === 'undefined') return;
+                const canvas = document.getElementById('webgl-canvas');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 15;
+                
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
 
-            window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
-
-            const stars =[];
-            const starCount = isMobile ? 80 : 150;
-            for (let i = 0; i < starCount; i++) {
-                stars.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5, alpha: Math.random(), speed: Math.random() * 0.03 });
-            }
-
-            class Meteor {
-                constructor() { this.reset(true); }
-                reset(initial = false) {
-                    this.x = Math.random() * w + w * 0.5; 
-                    this.y = -Math.random() * h;
-                    this.speed = 10 + Math.random() * 15;
-                    this.length = 80 + Math.random() * 100;
-                    this.active = true;
-                    if(initial) { this.x -= Math.random() * w * 2; this.y += Math.random() * h; }
-                }
-                update() {
-                    if (!this.active) return;
-                    this.x -= this.speed; this.y += this.speed; 
-                    if (this.x < -this.length || this.y > h + this.length) {
-                        this.active = false;
-                        setTimeout(() => this.reset(), Math.random() * 3000 + 1000);
-                    }
-                }
-                draw() {
-                    if (!this.active) return;
-                    const grad = ctx.createLinearGradient(this.x, this.y, this.x + this.length, this.y - this.length);
-                    grad.addColorStop(0, 'rgba(0, 240, 255, 1)'); 
-                    grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
-                    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.length, this.y - this.length);
-                    ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
-                }
-            }
-            
-            const meteors =[];
-            const meteorCount = isMobile ? 2 : 4;
-            for(let i=0; i<meteorCount; i++) meteors.push(new Meteor());
-
-            function animate() {
-                ctx.clearRect(0, 0, w, h);
-                ctx.fillStyle = '#ffffff';
-                stars.forEach(s => {
-                    s.alpha += s.speed;
-                    if (s.alpha <= 0.1 || s.alpha >= 1) s.speed *= -1;
-                    ctx.globalAlpha = s.alpha;
-                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+                // 创建抽象几何体 (二十面体细分)
+                const geometry = new THREE.IcosahedronGeometry(4, isMobile ? 8 : 16);
+                
+                // 提取顶点数据用于粒子系统
+                const positions = geometry.attributes.position.array;
+                const particleCount = positions.length / 3;
+                const pGeometry = new THREE.BufferGeometry();
+                pGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+                
+                // 记录原始位置，用于计算爆裂方向
+                const originalPositions = new Float32Array(positions);
+                pGeometry.setAttribute('aOriginal', new THREE.BufferAttribute(originalPositions, 3));
+                
+                // 粒子材质 (青色高亮)
+                const pMaterial = new THREE.PointsMaterial({
+                    size: isMobile ? 0.08 : 0.05,
+                    color: 0x00f0ff, transparent: true, opacity: 0.8,
+                    blending: THREE.AdditiveBlending
                 });
-                ctx.globalAlpha = 1;
-                meteors.forEach(m => { m.update(); m.draw(); });
-                requestAnimationFrame(animate);
-            }
-            animate();
+                
+                const particles = new THREE.Points(pGeometry, pMaterial);
+                // 稍微偏右放置
+                particles.position.set(isMobile ? 0 : 5, 0, 0);
+                scene.add(particles);
+
+                // 爆裂进度变量 (受 GSAP 控制)
+                const explosion = { progress: 0 };
+                
+                // GSAP 绑定：向下滑动时，progress 从 0 到 1
+                gsap.to(explosion, {
+                    progress: 1, ease: "none",
+                    scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 }
+                });
+
+                const clock = new THREE.Clock();
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    const t = clock.getElapsedTime();
+                    
+                    const posAttr = particles.geometry.attributes.position;
+                    const origAttr = particles.geometry.attributes.aOriginal;
+                    
+                    // 粒子流转形变逻辑
+                    for (let i = 0; i < particleCount; i++) {
+                        const idx = i * 3;
+                        const ox = origAttr.array[idx];
+                        const oy = origAttr.array[idx+1];
+                        const oz = origAttr.array[idx+2];
+                        
+                        // 基础液态形变 (Perlin Noise 模拟)
+                        const noise = Math.sin(ox*1.5 + t) * Math.cos(oy*1.5 + t) * Math.sin(oz*1.5 + t) * 0.5;
+                        
+                        // 爆裂扩散公式：进度 * 距离中心的向量倍数 + 随机扰动
+                        const explodeDist = explosion.progress * 15;
+                        const rx = ox + ox * explodeDist * (1 + Math.random()*0.2);
+                        const ry = oy + oy * explodeDist * (1 + Math.random()*0.2);
+                        const rz = oz + oz * explodeDist * (1 + Math.random()*0.2);
+
+                        // 混合：进度越小越像液态，进度越大越像爆裂
+                        posAttr.array[idx] = ox + ox * noise * (1 - explosion.progress) + (rx - ox) * explosion.progress;
+                        posAttr.array[idx+1] = oy + oy * noise * (1 - explosion.progress) + (ry - oy) * explosion.progress;
+                        posAttr.array[idx+2] = oz + oz * noise * (1 - explosion.progress) + (rz - oz) * explosion.progress;
+                    }
+                    posAttr.needsUpdate = true;
+                    
+                    // 整体自转
+                    particles.rotation.y = t * 0.2;
+                    particles.rotation.x = t * 0.1;
+
+                    renderer.render(scene, camera);
+                }
+                animate();
+
+                // 窗口适配
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+            } catch(e) { console.warn('WebGL Init Failed', e); }
         }
 
         // =========================================
-        // 🌟 核心动画引擎与滑动转换
+        // 🌟 2. 核心 CSS 3D & GSAP 滚动交互
         // =========================================
         function initGSAPAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
-            // 【核心重构 1】：全向滑动引擎 (Swipe-to-Scroll)
-            // 只要你在指定区域横向滑动手指，网页就会顺滑地滚动进度，完美实现左右/上下体验一致！
-            document.querySelectorAll('.swipe-zone').forEach(zone => {
-                let startX = 0, startY = 0;
-                zone.addEventListener('touchstart', e => {
-                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                }, { passive: true });
-                zone.addEventListener('touchmove', e => {
-                    if (!startX) return;
-                    const dx = startX - e.touches[0].clientX;
-                    const dy = startY - e.touches[0].clientY;
-                    // 如果是明显的横向划动，则转化为页面的纵向滚动，驱动 GSAP
-                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 5) {
-                        window.scrollBy({ top: dx * 1.5, behavior: 'auto' });
-                        startX = e.touches[0].clientX; 
-                    }
-                }, { passive: true });
+            // --- 全局：标题高亮扫描特效 ---
+            document.querySelectorAll('[data-trigger]').forEach(header => {
+                ScrollTrigger.create({ trigger: header, start: "top 80%", onEnter: () => header.classList.add('active') });
             });
 
-            // 1. 全息开场名片
-            const heroCard = document.getElementById('holo-card');
-            const handleHeroTilt = (x, y) => {
-                const rect = heroCard.getBoundingClientRect();
-                const rx = -((y - rect.top) / rect.height - 0.5) * 15;
-                const ry = ((x - rect.left) / rect.width - 0.5) * 15;
-                gsap.to(heroCard, { rotationX: rx, rotationY: ry, duration: 0.4, ease: "power2.out" });
-            };
-            heroCard.addEventListener('mousemove', e => handleHeroTilt(e.clientX, e.clientY));
-            heroCard.addEventListener('touchmove', e => handleHeroTilt(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-            heroCard.addEventListener('mouseleave', () => gsap.to(heroCard, {rotationX:0, rotationY:0, duration:0.5}));
+            // --- 01. Pingu 视差果冻 (Parallax & Jiggle) ---
+            // 背景慢速，咖啡杯中速，冰块快速，企鹅侧边探出
+            gsap.to(".pingu-bg", { y: isMobile ? 50 : 100, scrollTrigger: { trigger: ".pingu-section", start: "top bottom", end: "bottom top", scrub: 1 } });
+            gsap.to(".coffee-cup", { y: -50, rotationZ: 15, scrollTrigger: { trigger: ".pingu-section", start: "top 80%", end: "bottom top", scrub: 1.5 } });
+            gsap.to(".pingu-ice", { y: -150, x: -30, rotationZ: -20, scrollTrigger: { trigger: ".pingu-section", start: "top 80%", end: "bottom top", scrub: 1.2 } });
 
-            gsap.to(heroCard, { z: -300, y: 150, opacity: 0, scrollTrigger: { trigger: "#hero-trigger", start: "top top", end: "bottom top", scrub: 1 } });
+            // --- 02. 包装爆炸拆解 (Exploded View) ---
+            const boxTl = gsap.timeline({
+                scrollTrigger: { trigger: "#box-trigger", start: "top 60%", end: "bottom 20%", scrub: 1 }
+            });
+            // 整个盒子旋转展示
+            boxTl.to("#box-rotate", { rotationY: 180, rotationX: 15, ease: "none" }, 0);
+            // 三个层在 Z 轴分离
+            boxTl.to("#layer-1", { z: 150, opacity: 1, ease: "power1.out" }, 0.2); // 外盒向前拉
+            boxTl.to("#layer-2", { z: 0, opacity: 1, ease: "power1.out" }, 0.2);   // 金箔居中
+            boxTl.to("#layer-3", { z: -150, opacity: 0.5, ease: "power1.out" }, 0.2); // 内衬向后推
 
-            // 【核心重构 2】: 同屏 5 卡片画廊 (纯数学算法扇形展示)
-            const cards = document.querySelectorAll('.cover-card');
-            const totalCards = cards.length; // 5
+            // --- 03. 双生语境 (左右拖拽划分) ---
+            const splitSection = document.getElementById('split-trigger');
+            const splitLeft = document.getElementById('split-left');
+            const splitHandle = document.getElementById('split-handle');
             
-            ScrollTrigger.create({
-                trigger: "#coverflow-trigger", start: "center center", end: "+=2000", pin: true, scrub: 0.5,
-                onUpdate: (self) => {
-                    // self.progress 从 0 到 1
-                    const activeIndex = self.progress * (totalCards - 1);
-                    
-                    cards.forEach((card, i) => {
-                        // 计算当前卡片距离中心激活点的差距
-                        const offset = i - activeIndex; 
-                        const absOffset = Math.abs(offset);
-                        
-                        // 数学建模：让5张卡片像扇子一样展开
-                        // 横向位移
-                        const x = offset * (isMobile ? 35 : 25); 
-                        // 向后推的深度
-                        const z = -absOffset * 100;
-                        // 3D 偏转角
-                        const rotateY = -offset * 30;
-                        // 缩放与透明度
-                        const scale = Math.max(0.6, 1 - absOffset * 0.15);
-                        
-                        // 赋予高亮遮罩
-                        if(absOffset < 0.5) card.classList.add('active'); else card.classList.remove('active');
-
-                        card.style.transform = `translate(-50%, -50%) translateX(${x}vw) translateZ(${z}px) rotateY(${rotateY}deg) scale(${scale})`;
-                        card.style.zIndex = 100 - Math.round(absOffset * 10);
-                    });
-                }
-            });
-
-            // 3. Z-Shatter
-            gsap.utils.toArray('.panel-fly').forEach(panel => {
-                gsap.fromTo(panel, { z: -300, y: 100, rotationX: 15, opacity: 0 }, { z: 0, y: 0, rotationX: 0, opacity: 1, scrollTrigger: { trigger: panel, start: "top 95%", end: "top 60%", scrub: 1 } });
-            });
-
-            // 【核心重构 3】: 磁性网格 (物理缓动交互)
-            document.querySelectorAll('.mag-item').forEach(item => {
-                item.addEventListener('touchmove', e => {
-                    const rect = item.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const rx = -((touch.clientY - rect.top) / rect.height - 0.5) * 20; 
-                    const ry = ((touch.clientX - rect.left) / rect.width - 0.5) * 20;
-                    // 使用 GSAP 平滑阻尼过渡，拒绝生硬
-                    gsap.to(item, { rotationX: rx, rotationY: ry, scale: 1.05, duration: 0.3, ease: "power2.out" });
-                    item.style.zIndex = 10;
-                }, {passive: true});
+            // 鼠标 / 触摸移动逻辑
+            const moveSplit = (clientX) => {
+                const rect = splitSection.getBoundingClientRect();
+                // 限制边界
+                let xPos = clientX - rect.left;
+                if(xPos < 0) xPos = 0; if(xPos > rect.width) xPos = rect.width;
+                const percentage = (xPos / rect.width) * 100;
                 
-                const resetItem = () => {
-                    gsap.to(item, { rotationX: 0, rotationY: 0, scale: 1, duration: 0.5, ease: "bounce.out(1.2)" });
-                    item.style.zIndex = 1;
-                };
-                item.addEventListener('touchend', resetItem);
-                item.addEventListener('mouseleave', resetItem); 
-            });
-
-            // 4. Orbital Ring (支持全向手势)
-            const ring = document.getElementById('ring');
-            const ringSrcs =['https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80'];
-            
-            const ringZ = isMobile ? window.innerWidth * 0.45 : 350; 
-            ringSrcs.forEach((src, i) => {
-                const card = document.createElement('div'); card.className = 'ring-card';
-                card.style.backgroundImage = `url('${src}')`; card.onclick = () => openRichModal('维度之环 ' + (i+1), src);
-                card.style.transform = `rotateY(${i * 60}deg) translateZ(${ringZ}px)`; ring.appendChild(card);
-            });
-            // 环形依次旋转
-            gsap.to(ring, { rotationY: -360, ease: "none", scrollTrigger: { trigger: "#orbital-trigger", start: "top top", end: "bottom bottom", scrub: 1 }});
-
-            // 5. Parallax Stack 
-            const stackCards = gsap.utils.toArray('.stack-card');
-            stackCards.forEach((card, i) => {
-                if(i < stackCards.length - 1) {
-                    gsap.to(card, { scale: 0.9, opacity: 0.4, ease: "none", scrollTrigger: { trigger: card, start: "top 12%", end: "+=100%", scrub: 1 } });
-                }
-            });
-
-            // 【核心重构 4】: Footer 探照灯 (取消限制，随时上滑)
-            const contactFooter = document.getElementById('contact-footer'), contactMask = document.getElementById('contact-mask');
-            const updateMask = (x, y) => {
-                const rect = contactFooter.getBoundingClientRect();
-                contactMask.style.setProperty('--mx', `${x - rect.left}px`);
-                contactMask.style.setProperty('--my', `${y - rect.top}px`);
+                // 使用 CSS 变量或直接修改 width 均可，这里改 width 最丝滑
+                splitLeft.style.width = `${percentage}%`;
+                splitHandle.style.left = `${percentage}%`;
             };
-            contactFooter.addEventListener('mousemove', e => updateMask(e.clientX, e.clientY));
-            contactFooter.addEventListener('touchmove', e => updateMask(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
+            let isDragging = false;
+            splitHandle.addEventListener('mousedown', () => isDragging = true);
+            splitHandle.addEventListener('touchstart', () => isDragging = true, {passive: true});
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('touchend', () => isDragging = false);
+            
+            // 全屏监听防止滑出 handle 区域失效
+            splitSection.addEventListener('mousemove', e => { if(isDragging || !isMobile) moveSplit(e.clientX); });
+            splitSection.addEventListener('touchmove', e => { if(isDragging) moveSplit(e.touches[0].clientX); }, {passive: true});
+
+            // --- 04. Z轴时光隧道 (Z-Tunnel) ---
+            const tunnelCards = document.querySelectorAll('.tunnel-card');
+            
+            // 初始在纵深空间排列
+            tunnelCards.forEach((card, i) => {
+                gsap.set(card, { z: -i * 1200, opacity: 1 - i*0.2 }); // 越来越远，越来越暗
+            });
+
+            const tunnelTl = gsap.timeline({
+                scrollTrigger: { trigger: ".tunnel-section", start: "top top", end: "+=2000", pin: true, scrub: 0.5 }
+            });
+
+            // 滚动时，包裹器将所有卡片拉向摄像机 (z 变大)
+            tunnelTl.to("#tunnel-container", {
+                z: tunnelCards.length * 1200, ease: "none"
+            }, 0);
+
+            // 当卡片穿过摄像机 (Z > 500) 时，加上 RGB 色散模糊并淡出
+            tunnelCards.forEach((card) => {
+                tunnelTl.to(card, {
+                    opacity: 0,
+                    filter: "drop-shadow(20px 0 0 rgba(255,0,85,0.8)) drop-shadow(-20px 0 0 rgba(0,240,255,0.8)) blur(10px)",
+                    ease: "power2.in"
+                }, "<"); // 与位移同步，依靠进度动态计算
+            });
+
+            // 强制刷新渲染
             setTimeout(() => ScrollTrigger.refresh(), 500);
         }
 
-        // ==========================================
-        // 🌟 长详情页 Modal 逻辑 
-        // ==========================================
-        const modal = document.getElementById('unfold-modal');
-        const modalHero = document.getElementById('modal-hero');
-        const modalTitle = document.getElementById('modal-title');
+        // =========================================
+        // 🌟 3. Footer 信封交互与复制
+        // =========================================
+        function copyContact() {
+            // 手机端模拟点击激活
+            if(isMobile) document.getElementById('envelope').classList.toggle('active');
+            
+            // 复制逻辑
+            const textToCopy = "659510446@qq.com";
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            });
+        }
 
-        window.openRichModal = function(title, imgSrc) {
-            modalTitle.innerText = title;
-            modalHero.style.backgroundImage = `url('${imgSrc}')`;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; 
-            modal.scrollTop = 0; 
-        };
-
-        window.closeModal = function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = ''; 
-        };
     </script>
 </body>
 </html>
