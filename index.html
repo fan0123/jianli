@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ULTIMATE PORTFOLIO | iPhone 17 Optimized</title>
-    
-    <!-- 引入 Swiper.js 核心库 (解决项目1的完美左右滑动) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <title>全息交互个人作品集 | iPhone 17 完美适配</title>
     
     <style>
         /* ==========================================
-           1. 移动端抗抖动 & 流式排版引擎
+           1. 全局流式排版与抗抖动优化
         ========================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Orbitron:wght@500;700;900&display=swap');
         
         :root { --safe-top: env(safe-area-inset-top, 20px); --safe-bottom: env(safe-area-inset-bottom, 20px); }
         
@@ -20,154 +17,165 @@
         
         body, html {
             background-color: #020308; color: #ffffff;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Noto Sans SC', sans-serif;
             overflow-x: hidden; overflow-y: auto; 
-            /* 核心修复：防止 iOS 橡皮筋效应和滚动抖动 */
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch; overscroll-behavior-y: none;
         }
-
-        /* 隐藏滚动条 */
+        
         ::-webkit-scrollbar { display: none; }
 
-        #loader { position: fixed; inset: 0; background: #020308; z-index: 99999; display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-size: clamp(1.2rem, 5vw, 2rem); color: #00f0ff; letter-spacing: 3px; transition: opacity 0.5s ease; text-align: center; }
+        /* 初始化加载屏 */
+        #loader { position: fixed; inset: 0; background: #020308; z-index: 99999; display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-size: clamp(1rem, 4vw, 2rem); color: #00f0ff; letter-spacing: 5px; transition: opacity 0.6s ease; text-align: center; }
+        
+        /* 扫描线遮罩 */
         .scanlines { position: fixed; inset: 0; z-index: 990; pointer-events: none; background: linear-gradient(to bottom, transparent 50%, rgba(0,240,255,0.03) 50%); background-size: 100% 4px; }
         
-        #webgl-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
+        /* 浩瀚星空底层 (满血覆盖全站黑边) */
+        #meteor-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100svh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
+        
+        /* 所有内容层需透明，以透出底层星空 */
         .content-layer { position: relative; z-index: 10; }
 
-        /* 标题比例自适应 */
-        .section-header { text-align: center; padding: 12svh 5vw 4svh 5vw; position: relative; z-index: 10;}
-        .section-header h2 { font-family: 'Orbitron'; font-size: clamp(2.2rem, 8vw, 4rem); color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.8); text-transform: uppercase; line-height: 1.1; margin-bottom: 5px;}
-        .section-header p { color: #00f0ff; font-size: clamp(1rem, 3.5vw, 1.5rem); letter-spacing: 2px; font-weight: bold;}
+        /* 全局中文标题排版 */
+        .section-header { text-align: center; padding: 12svh 5vw 2svh 5vw; position: relative; z-index: 10; pointer-events: none;}
+        .section-header h2 { font-size: clamp(2rem, 8vw, 3.5rem); color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.8); font-weight: 900; letter-spacing: 2px;}
+        .section-header p { font-family: 'Orbitron'; color: #00f0ff; font-size: clamp(0.9rem, 3.5vw, 1.2rem); letter-spacing: 4px; margin-top: 5px; text-transform: uppercase;}
 
         /* ==========================================
-           2. 个人全息名片 (适配全面屏比例)
+           2. 极客全息开场 (HUD Hero)
         ========================================== */
-        .hero-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; perspective: 1000px; overflow: hidden; }
+        .hero-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; perspective: 1500px; overflow: hidden; }
         
+        /* HUD 旋转背景环 */
+        .hud-rings { position: absolute; width: clamp(280px, 80vw, 500px); height: clamp(280px, 80vw, 500px); z-index: 1; pointer-events: none; }
+        .hud-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed rgba(0,240,255,0.3); animation: spin 20s linear infinite; }
+        .hud-ring:nth-child(2) { inset: 20px; border: 2px solid rgba(255,0,85,0.2); border-left-color: transparent; border-right-color: transparent; animation: spin-reverse 15s linear infinite; }
+        .hud-ring:nth-child(3) { inset: -40px; border: 1px dotted rgba(0,240,255,0.5); animation: spin 30s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        
+        /* 主信息卡 */
         .hologram-card {
-            position: relative; 
-            width: 85vw; max-width: 400px; height: 65svh; max-height: 600px; z-index: 10;
-            background: rgba(10, 15, 30, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0,240,255,0.3); border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,240,255,0.2);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6vw;
+            position: relative; width: 85vw; max-width: 400px; padding: 10svh 5vw; z-index: 10;
+            background: rgba(5, 10, 20, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,240,255,0.4); border-radius: 30px;
+            box-shadow: 0 0 50px rgba(0,240,255,0.2), inset 0 0 30px rgba(0,240,255,0.1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             transform-style: preserve-3d;
         }
         
-        .profile-img { width: clamp(120px, 35vw, 180px); height: clamp(120px, 35vw, 180px); border-radius: 50%; background: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80') center/cover; border: 3px solid #00f0ff; box-shadow: 0 0 20px rgba(0,240,255,0.5); transform: translateZ(40px); margin-bottom: 4svh; }
-        .profile-name { font-family: 'Orbitron'; font-size: clamp(2rem, 8vw, 3rem); color: #fff; transform: translateZ(60px); text-shadow: 0 0 10px rgba(255,255,255,0.5); margin-bottom: 5px;}
-        .profile-title { font-size: clamp(1.1rem, 4vw, 1.5rem); color: #ff0055; font-weight: 700; transform: translateZ(30px); letter-spacing: 2px; margin-bottom: 15px;}
-        .profile-desc { text-align: center; color: #a0b0c0; font-size: clamp(0.95rem, 3.5vw, 1.1rem); line-height: 1.6; transform: translateZ(20px); }
+        .profile-img { width: clamp(100px, 30vw, 150px); height: clamp(100px, 30vw, 150px); border-radius: 50%; background: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80') center/cover; border: 3px solid #00f0ff; box-shadow: 0 0 30px rgba(0,240,255,0.8); transform: translateZ(60px); margin-bottom: 25px; }
+        .profile-name { font-size: clamp(1.8rem, 8vw, 2.5rem); font-weight: 900; color: #fff; transform: translateZ(80px); text-shadow: 0 0 10px rgba(255,255,255,0.5); margin-bottom: 5px; letter-spacing: 2px;}
+        .profile-title { font-family: 'Orbitron'; font-size: clamp(0.9rem, 4vw, 1.2rem); color: #ff0055; font-weight: 700; transform: translateZ(50px); letter-spacing: 3px; margin-bottom: 20px;}
+        .profile-desc { text-align: center; color: #b0c4de; font-size: clamp(0.9rem, 3.5vw, 1rem); line-height: 1.8; transform: translateZ(30px); }
+
+        .floating-tag { position: absolute; padding: 6px 15px; background: rgba(0,240,255,0.1); border: 1px solid #00f0ff; color: #00f0ff; border-radius: 30px; font-weight: bold; font-size: clamp(0.7rem, 3vw, 0.9rem); transform: translateZ(90px); box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+        .tag-1 { top: 10%; left: -8%; } .tag-2 { bottom: 15%; right: -8%; border-color: #ff0055; color: #ff0055; background: rgba(255,0,85,0.1); box-shadow: 0 0 15px rgba(255,0,85,0.4);}
 
         /* ==========================================
-           3. Project 1: Coverflow (真·左右滑动重构)
+           3. Project 1: 视差画廊 (横向+纵向滑动引擎)
         ========================================== */
-        .coverflow-section { height: 60svh; width: 100vw; position: relative; padding: 2vh 0; }
-        .swiper { width: 100%; height: 100%; padding-top: 20px; padding-bottom: 50px; }
-        .swiper-slide {
-            /* 手机上展示 70% 宽度，左右漏边引导滑动 */
-            width: 75vw; max-width: 350px; height: 100%; 
-            background-size: cover; background-position: center; border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(0,240,255,0.5); 
-            cursor: pointer;
+        .coverflow-section { height: 100svh; width: 100vw; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .gallery-track { display: flex; align-items: center; height: 100%; perspective: 1200px; transform-style: preserve-3d; position: absolute; left: 50%; }
+        .cover-card { 
+            position: absolute; left: -125px; /* 卡片宽度的负一半，使其居中计算 */
+            width: clamp(200px, 65vw, 300px); height: clamp(280px, 85vw, 450px); 
+            background-size: cover; background-position: center; 
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0,240,255,0.4); 
+            cursor: pointer; will-change: transform, opacity;
         }
+        /* 遮罩，未选中的变暗 */
+        .cover-card::before { content: ''; position: absolute; inset: 0; background: #000; opacity: 0.6; border-radius: 20px; transition: opacity 0.3s; }
+        .cover-card.active::before { opacity: 0; }
 
         /* ==========================================
-           4. Project 2: Z-Shatter
+           4. Project 2: 空间碎裂
         ========================================== */
         .features-section { padding: 5svh 5vw 15svh 5vw; perspective: 1000px; overflow: hidden; }
-        .glass-panel { background: rgba(10, 15, 30, 0.6); border: 1px solid rgba(255, 0, 85, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 8vw; margin-bottom: 8svh; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        .glass-panel h2 { font-family: 'Orbitron'; color: #ff0055; font-size: clamp(1.8rem, 7vw, 2.5rem); margin-bottom: 10px; }
-        .glass-panel p { color: #aaa; font-size: clamp(1.1rem, 4vw, 1.3rem); line-height: 1.6; }
+        .glass-panel { background: rgba(10, 15, 30, 0.4); border: 1px solid rgba(255, 0, 85, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 8vw; margin-bottom: 5svh; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .glass-panel h3 { font-size: clamp(1.5rem, 6vw, 2.2rem); margin-bottom: 10px; color: #ff0055; font-weight: 900;}
+        .glass-panel p { color: #a0b0c0; font-size: clamp(1rem, 4vw, 1.1rem); line-height: 1.8; }
 
         /* ==========================================
-           5. Project 3: Magnetic (完美等比不遮挡)
+           5. Project 3: 磁性矩阵 (防溢出，物理阻尼交互)
         ========================================== */
         .magnetic-section { padding: 5svh 0 15svh 0; perspective: 1200px; display: flex; justify-content: center; }
         .grid-container { 
-            display: grid; 
-            /* 严格锁定 2x2 网格，容器总宽 90vw，绝不溢出 */
-            grid-template-columns: repeat(2, 1fr); gap: 4vw; 
-            width: 90vw; max-width: 500px; 
-            transform-style: preserve-3d; 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 4vw; 
+            width: 85vw; max-width: 500px; transform-style: preserve-3d; 
         }
         .grid-item { 
-            /* 强制正方形 */
             aspect-ratio: 1 / 1; width: 100%; border-radius: 15px; 
             background-size: cover; background-position: center; position: relative; 
             transform-style: preserve-3d; box-shadow: 0 15px 30px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.2); 
         }
         .grid-inner-text { 
             position: absolute; bottom: 10px; right: 10px; background: rgba(255,0,85,0.9); 
-            padding: 5px 12px; border-radius: 6px; font-family: 'Orbitron'; font-weight: 700; 
-            font-size: clamp(0.7rem, 3vw, 1rem); transform: translateZ(30px); pointer-events: none; 
+            padding: 5px 12px; border-radius: 8px; font-weight: 700; 
+            font-size: clamp(0.7rem, 3vw, 1rem); transform: translateZ(40px); pointer-events: none; 
         }
 
         /* ==========================================
-           6. Project 4: Orbital Ring (手势滑动重构)
+           6. Project 4: 全息星环 (支持横滑)
         ========================================== */
-        .orbital-section { height: 70svh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; 
-            /* 允许触摸左右滑动，同时上下滑动页面 */
-            touch-action: pan-y; 
-        }
+        .orbital-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
         .ring-wrapper { perspective: 1500px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        .ring { position: relative; width: 55vw; max-width: 250px; height: 80vw; max-height: 380px; transform-style: preserve-3d; }
-        .ring-card { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .ring { position: relative; width: clamp(180px, 45vw, 250px); height: clamp(260px, 65vw, 380px); transform-style: preserve-3d; }
+        .ring-card { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 15px; box-shadow: 0 0 20px rgba(0,240,255,0.3); border: 1px solid rgba(255,255,255,0.2); }
 
         /* ==========================================
-           7. Project 5: Parallax Stack 
+           7. Project 5: 视差折叠
         ========================================== */
         .stack-section { padding: 5svh 5vw 20svh 5vw; position: relative; }
         .stack-card { 
-            position: sticky; top: calc(var(--safe-top) + 12svh); 
-            height: 60svh; width: 100%; border-radius: 24px; background-size: cover; background-position: center; 
+            position: sticky; top: calc(var(--safe-top) + 10svh); 
+            height: 65svh; width: 100%; border-radius: 20px; background-size: cover; background-position: center; 
             margin-bottom: 4svh; box-shadow: 0 -15px 40px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.2); 
-            display: flex; align-items: flex-end; padding: 8vw; transform-origin: top center; overflow: hidden;
+            display: flex; align-items: flex-end; padding: 6vw; transform-origin: top center; overflow: hidden;
             will-change: transform, opacity;
         }
-        .stack-card h3 { position: relative; z-index: 2; font-family: 'Orbitron'; font-size: clamp(2.2rem, 9vw, 4rem); color: #fff; text-shadow: 0 5px 15px #000; line-height: 1.1;}
+        .stack-card h3 { position: relative; z-index: 2; font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 900; color: #fff; text-shadow: 0 5px 15px #000; line-height: 1.1;}
         .stack-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); pointer-events: none;}
 
         /* ==========================================
-           8. Project 6: Footer 探照灯
+           8. Project 6: 探照灯结尾 (不阻碍滚动)
         ========================================== */
-        .contact-section { height: 100svh; position: relative; display: flex; justify-content: center; align-items: center; background: #010103; overflow: hidden; touch-action: none; }
-        .contact-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a1128 0%, #010103 100%); -webkit-mask-image: radial-gradient(circle clamp(150px, 40vw, 300px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); mask-image: radial-gradient(circle clamp(150px, 40vw, 300px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); }
-        .contact-title { font-family: 'Orbitron'; font-size: clamp(2.5rem, 10vw, 5rem); color: #fff; text-shadow: 0 0 20px #00f0ff; margin-bottom: 10px; text-align: center; }
-        .contact-email { font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 700; color: #ff0055; border-bottom: 2px solid #ff0055; padding-bottom: 5px; margin-bottom: 30px; text-shadow: 0 0 15px #ff0055; }
-        .contact-hint { position: absolute; font-family: 'Orbitron'; font-size: clamp(2rem, 8vw, 3.5rem); color: rgba(255,255,255,0.08); pointer-events: none; text-align: center; width: 100%;}
+        .contact-section { height: 100svh; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; 
+            /* 关键修复：让原生滑动起效 */
+            touch-action: pan-y; 
+        }
+        .contact-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a1128 0%, #010103 100%); -webkit-mask-image: radial-gradient(circle clamp(120px, 35vw, 250px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); mask-image: radial-gradient(circle clamp(120px, 35vw, 250px) at var(--mx, 50%) var(--my, 50%), black 20%, transparent 100%); pointer-events: none;}
+        .contact-title { font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; color: #fff; text-shadow: 0 0 20px #00f0ff; margin-bottom: 10px; text-align: center; }
+        .contact-email { font-family: 'Orbitron'; font-size: clamp(1.2rem, 5vw, 2.5rem); color: #ff0055; border-bottom: 2px solid #ff0055; padding-bottom: 5px; margin-bottom: 30px; text-shadow: 0 0 15px #ff0055; }
+        .contact-hint { position: absolute; font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 900; color: rgba(255,255,255,0.08); pointer-events: none; text-align: center; width: 100%;}
 
         /* ==========================================
-           9. 详情页 Modal (真·移动端自适应重构)
+           9. 高定版沉浸式 Modal 详情页
         ========================================== */
         #unfold-modal {
             position: fixed; inset: 0; background: #020308; z-index: 100000;
             clip-path: inset(50% 0 50% 0); -webkit-clip-path: inset(50% 0 50% 0);
             transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1), -webkit-clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
             display: block; overflow-y: auto; overflow-x: hidden; opacity: 0; pointer-events: none;
-            -webkit-overflow-scrolling: touch; overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch;
         }
         #unfold-modal.active { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); opacity: 1; pointer-events: auto; }
 
-        /* 右上角关闭按钮适配刘海/灵动岛 */
+        /* 精致小巧的安全区关闭按钮 */
         .modal-close-btn { 
-            position: fixed; top: var(--safe-top); right: 5vw; margin-top: 15px; font-size: 1.2rem; color: #ff0055; 
-            cursor: pointer; z-index: 100001; font-family: 'Orbitron'; font-weight: bold; 
-            background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; 
-            border: 1px solid #ff0055; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            position: fixed; top: var(--safe-top); right: 5vw; margin-top: 10px; font-size: 0.9rem; color: #fff; 
+            cursor: pointer; z-index: 100001; font-weight: bold; letter-spacing: 1px;
+            background: rgba(255, 0, 85, 0.8); padding: 6px 16px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(255,0,85,0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         
-        /* 详情页内容完美比重 */
         .modal-hero { height: 35svh; width: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 6vw; position: relative; }
         .modal-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #020308 0%, transparent 80%); }
-        .modal-title-huge { font-family: 'Orbitron'; font-size: clamp(2.5rem, 11vw, 4rem); color: #fff; position: relative; z-index: 2; text-shadow: 0 5px 15px rgba(0,0,0,0.8); line-height: 1.1; }
+        .modal-title-huge { font-size: clamp(2rem, 9vw, 4rem); font-weight: 900; color: #fff; position: relative; z-index: 2; text-shadow: 0 5px 15px rgba(0,0,0,0.8); line-height: 1.1; }
         
         .modal-body { padding: 5svh 6vw calc(var(--safe-bottom) + 10svh) 6vw; max-width: 800px; margin: 0 auto; }
-        .modal-desc-text { font-size: clamp(1rem, 4.5vw, 1.2rem); color: #b0c4de; line-height: 1.8; margin-bottom: 30px; border-left: 3px solid #00f0ff; padding-left: 15px; }
+        .modal-desc-text { font-size: clamp(0.95rem, 4vw, 1.1rem); color: #b0c4de; line-height: 1.8; margin-bottom: 30px; border-left: 3px solid #00f0ff; padding-left: 15px; }
         
-        /* 图片展示改为单列，防止挤压 */
         .modal-gallery { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .modal-gallery img { width: 100%; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 
@@ -175,112 +183,116 @@
 </head>
 <body>
 
-    <div id="loader">OPTIMIZING FOR MOBILE...</div>
+    <div id="loader">系统初始化中...</div>
     <div class="scanlines"></div>
-    <canvas id="webgl-canvas"></canvas>
+    <canvas id="meteor-canvas"></canvas>
 
     <div class="content-layer">
         
-        <!-- 名片开场 -->
+        <!-- 1. 全息开场 -->
         <section class="hero-section" id="hero-trigger">
+            <div class="hud-rings">
+                <div class="hud-ring"></div>
+                <div class="hud-ring"></div>
+                <div class="hud-ring"></div>
+            </div>
             <div class="hologram-card" id="holo-card">
                 <div class="floating-tag tag-1">WEB3D</div>
-                <div class="floating-tag tag-2">GSAP PRO</div>
+                <div class="floating-tag tag-2">移动端适配</div>
                 <div class="profile-img"></div>
-                <div class="profile-name">ALEX CHEN</div>
-                <div class="profile-title">CREATIVE DEVELOPER</div>
+                <div class="profile-name">艾利克斯 (ALEX)</div>
+                <div class="profile-title">视觉图形工程师</div>
                 <div class="profile-desc">
-                    已完美适配手机端比例。<br>
-                    请触摸互动或向下滑动探索。
+                    致力于打破二维屏幕的物理束缚。<br>
+                    精通流体力学渲染与空间交互矩阵，<br>
+                    为你构建顶级的次世代视觉艺术。
                 </div>
             </div>
         </section>
 
-        <!-- 项目 1: Swiper Coverflow (真正丝滑左右滑) -->
-        <div class="section-header"><h2>01 / Coverflow</h2><p>Swipe Left / Right</p></div>
-        <div class="coverflow-section">
-            <div class="swiper mySwiper">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide" onclick="openRichModal('CYBER CITY', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80')"></div>
-                    <div class="swiper-slide" onclick="openRichModal('ABSTRACT ART', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80')"></div>
-                    <div class="swiper-slide" onclick="openRichModal('OCEAN WAVES', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80')"></div>
-                    <div class="swiper-slide" onclick="openRichModal('SPACE UI', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80')"></div>
-                </div>
+        <!-- 2. Coverflow 画廊 (全向滑动引擎) -->
+        <div class="section-header"><h2>01 / 视差画廊</h2><p>OMNI-DIRECTIONAL SWIPE</p></div>
+        <div class="coverflow-section swipe-zone" id="coverflow-trigger">
+            <div class="gallery-track">
+                <div class="cover-card" onclick="openRichModal('赛博都市', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80')"></div>
+                <div class="cover-card" onclick="openRichModal('数字抽象', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80')"></div>
+                <div class="cover-card" onclick="openRichModal('粒子声波', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80')"></div>
+                <div class="cover-card" onclick="openRichModal('空间跃迁', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80')"></div>
+                <div class="cover-card" onclick="openRichModal('夏日风暴', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80')"></div>
             </div>
         </div>
 
-        <!-- 项目 2: Z-Shatter -->
-        <div class="section-header" style="margin-top:5vh;"><h2>02 / Z-Shatter</h2><p>Deep Space Parallax</p></div>
+        <!-- 3. Z-Shatter 飞入 -->
+        <div class="section-header" style="margin-top:5vh;"><h2>02 / 空间碎裂</h2><p>DEEP PARALLAX</p></div>
         <div class="features-section">
             <div class="glass-panel panel-fly">
-                <h2 style="color: #ff0055;">DEEP FLY-IN</h2>
-                <p>视觉面板从屏幕深处直冲而出。</p>
+                <h3 style="color: #ff0055;">深度跃迁</h3>
+                <p>视觉面板从屏幕极深处直冲而出，伴随精确的物理阻尼计算。</p>
             </div>
             <div class="glass-panel right panel-fly">
-                <h2 style="color: #00f0ff;">GLASSMORPHISM</h2>
-                <p>完美的毛玻璃与环境光效融合。</p>
+                <h3 style="color: #00f0ff;">拟物光影</h3>
+                <p>高级毛玻璃滤镜与底层星云光效的完美混合，透出次世代质感。</p>
             </div>
         </div>
 
-        <!-- 项目 3: Magnetic Matrix (等比2x2，独立触控倾斜) -->
-        <div class="section-header"><h2>03 / Magnetic</h2><p>Touch Each Card</p></div>
+        <!-- 4. Magnetic 磁力矩阵 (物理缓动+等比网格) -->
+        <div class="section-header"><h2>03 / 磁性矩阵</h2><p>GRAVITY SENSOR</p></div>
         <div class="magnetic-section">
             <div class="grid-container">
-                <div class="grid-item mag-item" onclick="openRichModal('MATRIX A', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('MATRIX B', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('MATRIX C', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
-                <div class="grid-item mag-item" onclick="openRichModal('MATRIX D', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
+                <div class="grid-item mag-item" onclick="openRichModal('矩阵核心 A', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
+                <div class="grid-item mag-item" onclick="openRichModal('矩阵核心 B', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
+                <div class="grid-item mag-item" onclick="openRichModal('矩阵核心 C', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
+                <div class="grid-item mag-item" onclick="openRichModal('矩阵核心 D', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80');"><div class="grid-inner-text">TOUCH</div></div>
             </div>
         </div>
 
-        <!-- 项目 4: Orbital Ring (真实手指拨动旋转) -->
-        <div class="section-header"><h2>04 / Orbital Ring</h2><p>Swipe Left / Right</p></div>
-        <div class="orbital-section" id="orbital-container">
+        <!-- 5. Orbital Ring 星环 (真·手势拖拽) -->
+        <div class="section-header"><h2>04 / 全息星环</h2><p>ORBITAL DRAG</p></div>
+        <div class="orbital-section swipe-zone" id="orbital-trigger">
             <div class="ring-wrapper">
                 <div class="ring" id="ring"></div>
             </div>
         </div>
 
-        <!-- 项目 5: Parallax Stack -->
-        <div class="section-header"><h2>05 / Parallax Stack</h2><p>Sticky Fold</p></div>
+        <!-- 6. Parallax Stack 折叠 -->
+        <div class="section-header"><h2>05 / 视差折叠</h2><p>STICKY FOLD</p></div>
         <div class="stack-section">
-            <div class="stack-card" onclick="openRichModal('SUMMER VIBE', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'); z-index: 1;"><h3>01 / SUMMER</h3></div>
-            <div class="stack-card" onclick="openRichModal('CYBER PUNK', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80'); z-index: 2;"><h3>02 / CYBER</h3></div>
-            <div class="stack-card" onclick="openRichModal('ABSTRACT TECH', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); z-index: 3;"><h3>03 / ABSTRACT</h3></div>
+            <div class="stack-card" onclick="openRichModal('重力坍缩', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'); z-index: 1;"><h3>01 / 坍缩</h3></div>
+            <div class="stack-card" onclick="openRichModal('霓虹都市', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80'); z-index: 2;"><h3>02 / 霓虹</h3></div>
+            <div class="stack-card" onclick="openRichModal('代码深渊', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); z-index: 3;"><h3>03 / 深渊</h3></div>
         </div>
 
-        <!-- 项目 6: Hover Footer -->
-        <div class="section-header" style="margin-bottom:0; z-index:20;"><h2>Let's Connect</h2><p>Touch & Hold</p></div>
+        <!-- 7. Hover Footer (不阻碍滚动) -->
+        <div class="section-header" style="margin-bottom:0; z-index:20;"><h2>06 / 探索未知</h2><p>TOUCH TO REVEAL</p></div>
         <div class="contact-section" id="contact-footer">
-            <div class="contact-hint">SWIPE HERE</div>
+            <div class="contact-hint">触摸照亮区域</div>
             <div class="contact-content" id="contact-mask" style="--mx: 50%; --my: 50%;">
-                <h1 class="contact-title">BUILD THE FUTURE</h1>
+                <h2 class="contact-title">共创数字未来</h2>
                 <div class="contact-email">hello@alex.com</div>
             </div>
         </div>
 
     </div>
 
-    <!-- 手机自适应长详情页 Modal -->
+    <!-- 移动端长详情页 Modal -->
     <div id="unfold-modal">
-        <div class="modal-close-btn" onclick="closeModal()">✕ CLOSE</div>
+        <div class="modal-close-btn" onclick="closeModal()">关闭 ✕</div>
         <div class="modal-hero" id="modal-hero">
             <h1 class="modal-title-huge" id="modal-title">TITLE</h1>
         </div>
         <div class="modal-body">
             <p class="modal-desc-text">
-                已深度适配 iPhone 17 及所有全面屏机型。<br>首图与文字排版采用视口比例单位缩放，瀑布流图片完美居中显示，滑动无任何卡顿。
+                这是一个已深度适配全面屏的独立滚动容器。首图与文字排版采用流式计算，下方的图片组在移动端会自动转化为单列呈现，保证交互丝滑，绝无抖动与溢出。
             </p>
             <div class="modal-gallery">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80">
-                <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80">
-                <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
+                <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
+                <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80" alt="Detail Image">
             </div>
         </div>
     </div>
 
-    <!-- 引入 Swiper & GSAP -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <!-- 核心动画库 -->
     <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
 
@@ -291,121 +303,201 @@
             document.getElementById('loader').style.opacity = 0;
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
-                initSwiper();
+                initMeteorUniverse();
                 initGSAPAnimations();   
             }, 500);
         };
 
         // =========================================
-        // 【核心大招 1】原生滑动的 Swiper 引擎
-        // 彻底解决项目 1 Coverflow 左右滑动发抖问题
+        // 🌟 浩瀚星空与流星雨物理引擎
+        // 解决项目间大面积黑色空白的问题
         // =========================================
-        function initSwiper() {
-            new Swiper('.mySwiper', {
-                effect: 'coverflow',
-                grabCursor: true,
-                centeredSlides: true,
-                slidesPerView: 'auto',
-                coverflowEffect: {
-                    rotate: 45,      // 完美 3D 偏转角
-                    stretch: 0,
-                    depth: 150,      // 纵深立体感
-                    modifier: 1,
-                    slideShadows: true,
-                },
-            });
+        function initMeteorUniverse() {
+            const canvas = document.getElementById('meteor-canvas');
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width = window.innerWidth;
+            let h = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+
+            // 生成静谧繁星
+            const stars =[];
+            const starCount = isMobile ? 80 : 150;
+            for (let i = 0; i < starCount; i++) {
+                stars.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5, alpha: Math.random(), speed: Math.random() * 0.03 });
+            }
+
+            // 流星体类
+            class Meteor {
+                constructor() { this.reset(true); }
+                reset(initial = false) {
+                    this.x = Math.random() * w + w * 0.5; // 从右方外部产生
+                    this.y = -Math.random() * h;
+                    this.speed = 10 + Math.random() * 15;
+                    this.length = 80 + Math.random() * 100;
+                    this.active = true;
+                    // 初始生成时打散分布，避免同时出现
+                    if(initial) { this.x -= Math.random() * w * 2; this.y += Math.random() * h; }
+                }
+                update() {
+                    if (!this.active) return;
+                    this.x -= this.speed; this.y += this.speed; // 向左下角划过
+                    if (this.x < -this.length || this.y > h + this.length) {
+                        this.active = false;
+                        setTimeout(() => this.reset(), Math.random() * 4000 + 1000);
+                    }
+                }
+                draw() {
+                    if (!this.active) return;
+                    const grad = ctx.createLinearGradient(this.x, this.y, this.x + this.length, this.y - this.length);
+                    grad.addColorStop(0, 'rgba(0, 240, 255, 1)'); 
+                    grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+                    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.length, this.y - this.length);
+                    ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+                }
+            }
+            
+            const meteors =[];
+            const meteorCount = isMobile ? 2 : 4;
+            for(let i=0; i<meteorCount; i++) meteors.push(new Meteor());
+
+            // 增加星云底色点缀
+            function drawNebula() {
+                const g1 = ctx.createRadialGradient(w*0.2, h*0.3, 0, w*0.2, h*0.3, w*0.8);
+                g1.addColorStop(0, 'rgba(0, 240, 255, 0.05)'); g1.addColorStop(1, 'transparent');
+                ctx.fillStyle = g1; ctx.fillRect(0,0,w,h);
+                
+                const g2 = ctx.createRadialGradient(w*0.8, h*0.7, 0, w*0.8, h*0.7, w*0.8);
+                g2.addColorStop(0, 'rgba(255, 0, 85, 0.03)'); g2.addColorStop(1, 'transparent');
+                ctx.fillStyle = g2; ctx.fillRect(0,0,w,h);
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                drawNebula();
+
+                ctx.fillStyle = '#ffffff';
+                stars.forEach(s => {
+                    s.alpha += s.speed;
+                    if (s.alpha <= 0.1 || s.alpha >= 1) s.speed *= -1;
+                    ctx.globalAlpha = s.alpha;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+                meteors.forEach(m => { m.update(); m.draw(); });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
         }
 
+        // =========================================
+        // 🌟 GSAP 与核心交互引擎
+        // =========================================
         function initGSAPAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
-            // =========================================
-            // 个人名片交互 (触控 3D 倾斜重构)
-            // =========================================
-            const heroCard = document.getElementById('holo-card');
-            const handleHeroTilt = (clientX, clientY) => {
-                const rect = heroCard.getBoundingClientRect();
-                const x = clientX - rect.left - rect.width/2; 
-                const y = clientY - rect.top - rect.height/2;
-                gsap.to(heroCard, {
-                    rotationX: -(y / (rect.height/2)) * 15,
-                    rotationY: (x / (rect.width/2)) * 15,
-                    duration: 0.1
-                });
-            };
-            heroCard.addEventListener('touchmove', e => handleHeroTilt(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-            heroCard.addEventListener('mousemove', e => handleHeroTilt(e.clientX, e.clientY));
-            const resetHero = () => gsap.to(heroCard, { rotationX:0, rotationY:0, duration: 0.5 });
-            heroCard.addEventListener('touchend', resetHero);
-            heroCard.addEventListener('mouseleave', resetHero);
-
-            // 滚动淡出
-            gsap.to(heroCard, { z: -300, y: 100, opacity: 0, scrollTrigger: { trigger: "#hero-trigger", start: "top top", end: "bottom top", scrub: 1 } });
-
-            // =========================================
-            // Project 2: Z-Shatter
-            // =========================================
-            gsap.utils.toArray('.panel-fly').forEach(panel => {
-                gsap.fromTo(panel, { z: -300, y: 100, rotationX: 20, opacity: 0 }, { z: 0, y: 0, rotationX: 0, opacity: 1, scrollTrigger: { trigger: panel, start: "top 95%", end: "top 60%", scrub: 1 } });
+            // 【核心重构 1】全向滑动交互转换器 (Swipe to Scroll)
+            // 让用户在项目1和4区域左右划动时，如同顺滑地上下划动页面
+            document.querySelectorAll('.swipe-zone').forEach(zone => {
+                let startX = 0, startY = 0;
+                zone.addEventListener('touchstart', e => {
+                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+                }, { passive: true });
+                zone.addEventListener('touchmove', e => {
+                    if (!startX) return;
+                    const dx = startX - e.touches[0].clientX;
+                    const dy = startY - e.touches[0].clientY;
+                    // 如果横向滑动幅度大于纵向，则转化成极度丝滑的页面滚动
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        window.scrollBy({ top: dx * 2, behavior: 'auto' });
+                        startX = e.touches[0].clientX; // 避免指数级加速
+                    }
+                }, { passive: true });
             });
 
-            // =========================================
-            // 【核心大招 2】项目 3 (Magnetic) 单卡片精细触控
-            // 解决超出屏幕和缺乏 3D 效果问题
-            // =========================================
+            // 1. 全息开场 (物理阻尼交互)
+            const heroCard = document.getElementById('holo-card');
+            const handleHeroTilt = (x, y) => {
+                const rect = heroCard.getBoundingClientRect();
+                const rx = -((y - rect.top) / rect.height - 0.5) * 20;
+                const ry = ((x - rect.left) / rect.width - 0.5) * 20;
+                // 使用 GSAP to 产生完美的物理平滑过渡，解决生硬问题
+                gsap.to(heroCard, { rotationX: rx, rotationY: ry, duration: 0.5, ease: "power2.out" });
+            };
+            heroCard.addEventListener('mousemove', e => handleHeroTilt(e.clientX, e.clientY));
+            heroCard.addEventListener('touchmove', e => handleHeroTilt(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+            heroCard.addEventListener('mouseleave', () => gsap.to(heroCard, {rotationX:0, rotationY:0, duration:0.5}));
+
+            // 开场向下滚动的视差飞出
+            gsap.to(heroCard, { z: -300, y: 100, opacity: 0, scrollTrigger: { trigger: "#hero-trigger", start: "top top", end: "bottom top", scrub: 1 } });
+
+            // 2. Coverflow (保证展示5张卡片)
+            const track = document.querySelector('.gallery-track');
+            const cards = document.querySelectorAll('.cover-card');
+            
+            // GSAP 驱动横向位移，因为配合了前面的 Swipe to Scroll，现在上下左右滑都有同等效果
+            gsap.to(track, {
+                x: () => -(cards.length * 200), // 动态计算距离确保滑完 5 张
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#coverflow-trigger", start: "center center", end: "+=1500", pin: true, scrub: 0.5,
+                    onUpdate: () => {
+                        const centerX = window.innerWidth / 2, maxDist = window.innerWidth / 1.5; 
+                        cards.forEach(card => {
+                            const rect = card.getBoundingClientRect(); const cardCenter = rect.left + rect.width / 2;
+                            const dist = Math.abs(centerX - cardCenter); let ratio = Math.max(0, 1 - (dist / maxDist)); 
+                            // 动态赋予 active 类，处理遮罩高亮
+                            if(ratio > 0.8) card.classList.add('active'); else card.classList.remove('active');
+                            
+                            // 直接写入 style，避免与 CSS transition 冲突引发发抖
+                            card.style.transform = `perspective(1200px) scale(${0.8 + ratio * 0.25}) rotateY(${((cardCenter - centerX) / maxDist) * -45}deg) translateZ(${ratio*50}px)`;
+                            card.style.zIndex = Math.round(ratio * 100);
+                        });
+                    }
+                }
+            });
+
+            // 3. Z-Shatter
+            gsap.utils.toArray('.panel-fly').forEach(panel => {
+                gsap.fromTo(panel, { z: -300, y: 100, rotationX: 15, opacity: 0 }, { z: 0, y: 0, rotationX: 0, opacity: 1, scrollTrigger: { trigger: panel, start: "top 95%", end: "top 60%", scrub: 1 } });
+            });
+
+            // 【核心重构 2】项目 3 Magnetic Matrix (物理缓动+缩小不遮挡)
             document.querySelectorAll('.mag-item').forEach(item => {
                 item.addEventListener('touchmove', e => {
                     const rect = item.getBoundingClientRect();
                     const touch = e.touches[0];
-                    const x = touch.clientX - rect.left - rect.width/2;
-                    const y = touch.clientY - rect.top - rect.height/2;
-                    const rotateX = -(y / (rect.height/2)) * 25; // 手机端倾斜放大
-                    const rotateY = (x / (rect.width/2)) * 25;
-                    item.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                    const rx = -((touch.clientY - rect.top) / rect.height - 0.5) * 30; // 放大倾斜率
+                    const ry = ((touch.clientX - rect.left) / rect.width - 0.5) * 30;
+                    // 加入 GSAP 平滑处理，拒绝生硬
+                    gsap.to(item, { rotationX: rx, rotationY: ry, scale: 1.05, duration: 0.3, ease: "power2.out" });
                     item.style.zIndex = 10;
                 }, {passive: true});
                 
-                item.addEventListener('touchend', () => {
-                    item.style.transform = `perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                const resetItem = () => {
+                    gsap.to(item, { rotationX: 0, rotationY: 0, scale: 1, duration: 0.5, ease: "power2.out" });
                     item.style.zIndex = 1;
-                });
+                };
+                item.addEventListener('touchend', resetItem);
+                item.addEventListener('mouseleave', resetItem); // 兼容电脑
             });
 
-            // =========================================
-            // 【核心大招 3】项目 4 星环真手势拖拽旋转
-            // 抛弃滚动，改为手指横向拨动转圈
-            // =========================================
+            // 【核心重构 3】项目 4 Orbital Ring 
+            // （支持左右滑动，配合全向引擎自动转化，这里保留基于 Scroll 的 3D 旋转）
             const ring = document.getElementById('ring');
-            const orbitalContainer = document.getElementById('orbital-container');
             const ringSrcs =['https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80'];
             
-            // 计算等比半径 (手机屏宽的 40%)
-            const ringZ = window.innerWidth * 0.42; 
+            // 半径动态适配屏幕宽度，绝对不会超出
+            const ringZ = isMobile ? window.innerWidth * 0.42 : 350; 
             ringSrcs.forEach((src, i) => {
                 const card = document.createElement('div'); card.className = 'ring-card';
-                card.style.backgroundImage = `url('${src}')`; card.onclick = () => openRichModal('RING ' + i, src);
+                card.style.backgroundImage = `url('${src}')`; card.onclick = () => openRichModal('全息维度 ' + (i+1), src);
                 card.style.transform = `rotateY(${i * 60}deg) translateZ(${ringZ}px)`; ring.appendChild(card);
             });
+            gsap.to(ring, { rotationY: -360, ease: "none", scrollTrigger: { trigger: "#orbital-trigger", start: "top top", end: "bottom bottom", scrub: 1 }});
 
-            // 手势驱动星环算法
-            let currentAngle = 0, startX = 0, currentRotation = 0;
-            orbitalContainer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
-            orbitalContainer.addEventListener('touchmove', e => {
-                const dx = e.touches[0].clientX - startX;
-                currentRotation = currentAngle + dx * 0.6; // 灵敏度
-                ring.style.transform = `rotateY(${currentRotation}deg)`;
-            }, {passive: true});
-            orbitalContainer.addEventListener('touchend', () => {
-                currentAngle = currentRotation;
-                // 吸附到最近的 60 度角
-                const snapAngle = Math.round(currentAngle / 60) * 60;
-                gsap.to(ring, {rotationY: snapAngle, duration: 0.4, ease: "back.out(1.2)"});
-                currentAngle = snapAngle;
-            });
-
-            // =========================================
-            // 7. Parallax Stack (完美缩放比例)
-            // =========================================
+            // 5. Parallax Stack 
             const stackCards = gsap.utils.toArray('.stack-card');
             stackCards.forEach((card, i) => {
                 if(i < stackCards.length - 1) {
@@ -413,22 +505,23 @@
                 }
             });
 
-            // =========================================
-            // 8. Footer 探照灯
-            // =========================================
-            const contactFooter = document.getElementById('contact-footer'), contactMask = document.getElementById('contact-mask');
-            const updateMask = (x, y) => {
+            // 【核心重构 4】解决底部滑不动的问题
+            // 不使用 preventDefault，不干扰原生滚动，只被动拿数据画光圈
+            const contactFooter = document.getElementById('contact-footer');
+            const contactMask = document.getElementById('contact-mask');
+            const updateMask = (clientX, clientY) => {
                 const rect = contactFooter.getBoundingClientRect();
-                contactMask.style.setProperty('--mx', `${x - rect.left}px`);
-                contactMask.style.setProperty('--my', `${y - rect.top}px`);
+                contactMask.style.setProperty('--mx', `${clientX - rect.left}px`);
+                contactMask.style.setProperty('--my', `${clientY - rect.top}px`);
             };
-            contactFooter.addEventListener('touchmove', e => updateMask(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+            contactFooter.addEventListener('mousemove', e => updateMask(e.clientX, e.clientY));
+            contactFooter.addEventListener('touchmove', e => updateMask(e.touches[0].clientX, e.touches[0].clientY), {passive: true}); // passive 保证页面随时可滚走
 
             setTimeout(() => ScrollTrigger.refresh(), 500);
         }
 
         // ==========================================
-        // 🌟 长详情页 Modal 逻辑 (移动端优化适配)
+        // 🌟 长详情页 Modal 逻辑 (精美 UI 升级)
         // ==========================================
         const modal = document.getElementById('unfold-modal');
         const modalHero = document.getElementById('modal-hero');
