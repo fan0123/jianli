@@ -24,12 +24,13 @@
         .section-header h2 { font-family: 'Playfair Display'; font-size: clamp(2rem, 8vw, 4rem); font-weight: 600; }
         .section-header p { font-size: 0.8rem; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px; }
 
-        /* 首屏动效 (修改为 100svh 高度，防止过度滞留) */
+        /* 首屏动效 */
         .hero-wrap { height: 100svh; position: relative; }
         .hero-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .hero-txt-center { position: absolute; z-index: 1; text-align: center; pointer-events: none; }
         .hero-txt-center h1 { font-family: 'Playfair Display'; font-size: clamp(4rem, 15vw, 12rem); font-style: italic; line-height: 1; }
-        .hero-img-box { position: relative; z-index: 2; width: 60vw; height: 80svh; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        /* 修复：使用 clamp 保证初始比例绝对是正常人像比例，杜绝长条状 */
+        .hero-img-box { position: relative; z-index: 2; width: clamp(280px, 75vw, 450px); height: clamp(380px, 60svh, 600px); border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
         .hero-img-box img { width: 100%; height: 100%; object-fit: cover; }
         .hero-intro { position: absolute; z-index: 3; width: clamp(300px, 85vw, 400px); opacity: 0; }
         .hero-intro h2 { font-family: 'Playfair Display'; font-size: clamp(2.2rem, 6vw, 3rem); color: var(--primary); margin-bottom: 20px; }
@@ -41,22 +42,22 @@
         .arc-card img { width: 100%; height: 60%; object-fit: cover; }
         .arc-info { padding: 25px; color: #111; flex-grow: 1; pointer-events: none; }
 
-        /* 项目2: Posters */
-        .posters-wrap { height: 200svh; position: relative; z-index: 10; }
+        /* 项目2: Posters (增加高度，降低滑动速度) */
+        .posters-wrap { height: 350svh; position: relative; z-index: 10; }
         .posters-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; cursor: grab; }
 
-        /* 项目3: Glass */
-        .glass-wrap { padding: 10svh 5vw; position: relative; z-index: 10; }
-        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px; max-width: 600px; margin-bottom: 10svh; opacity: 0; transform: translateZ(-200px); }
+        /* 项目3: Glass (增加间距，使之慢点划过) */
+        .glass-wrap { padding: 20svh 5vw 30svh 5vw; position: relative; z-index: 10; }
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px; max-width: 600px; margin-bottom: 15svh; opacity: 0; transform: translateZ(-200px); }
 
-        /* 项目4: Orbit */
-        .ring-wrap { height: 200svh; position: relative; z-index: 10; }
+        /* 项目4: Orbit (增加高度，降低滑动速度) */
+        .ring-wrap { height: 300svh; position: relative; z-index: 10; }
         .ring-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 2000px; }
         .ring-container { position: relative; width: clamp(240px, 60vw, 300px); height: clamp(340px, 80vw, 400px); transform-style: preserve-3d; }
         .ring-item { position: absolute; inset: 0; border-radius: 15px; background-size: cover; background-position: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
         /* 项目5: Circular Gallery */
-        .circular-wrap { height: 250svh; position: relative; z-index: 10; }
+        .circular-wrap { height: 350svh; position: relative; z-index: 10; }
         .circular-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; cursor: pointer; }
 
         /* 项目6: Stack */
@@ -69,7 +70,6 @@
         #lanyard-canvas { position: absolute; inset: 0; z-index: 1; cursor: grab; touch-action: pan-y; }
         #lanyard-canvas:active { cursor: grabbing; }
         .footer-bg-txt { position: absolute; top: 50%; transform: translateY(-50%); font-family: 'Playfair Display'; font-size: 15vw; opacity: 0.05; text-align: center; pointer-events: none; line-height: 0.9; width: 100%; }
-        /* 针对卡片调整比例 */
         #html-label { position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, -50%); color: #111; text-align: center; font-family: sans-serif; background: transparent; width: 280px; padding: 10px; opacity: 0;}
 
         /* Modal */
@@ -102,7 +102,7 @@
 
     <div class="content-layer">
         
-        <!-- 0. 首屏 (修改为常规高度，结束动画后自然滚走) -->
+        <!-- 0. 首屏 -->
         <section class="hero-wrap">
             <div class="hero-sticky">
                 <div class="hero-txt-center">
@@ -125,7 +125,7 @@
             <div class="arc-sticky" id="arc-container"></div>
         </section>
 
-        <!-- 2. Flying Posters (调整为 3 张卡片) -->
+        <!-- 2. Flying Posters -->
         <div class="section-header"><h2>02. Dimension</h2><p>Click Any Poster</p></div>
         <section class="posters-wrap">
             <div class="posters-sticky" id="posters-canvas"></div>
@@ -162,7 +162,7 @@
         <!-- 7. Lanyard Footer -->
         <footer class="footer-wrap">
             <div class="footer-bg-txt">DRIVE<br>GROWTH</div>
-            <div class="section-header" style="position: absolute; top: 8svh; width: 100%; z-index: 0;" id="connect-anchor">
+            <div class="section-header" style="position: absolute; top: 12svh; width: 100%; z-index: 0;" id="connect-anchor">
                 <h2>Connect</h2><p>Drag My Card</p>
             </div>
             <canvas id="lanyard-canvas"></canvas>
@@ -211,7 +211,7 @@
         };
 
         // ==========================================
-        // 0. 流星星空背景 (OGL)
+        // 0. 流星星空背景 (多流星位置深浅随机算法)
         // ==========================================
         function initGalaxy() {
             const renderer = new Renderer({ alpha: true });
@@ -235,16 +235,23 @@
                             col += (0.005 / length(g - vec2(n-0.5, fract(n*10.)-0.5))) * d * smoothstep(1., 0.8, d) * vec3(n, 0.6, 1.);
                         }
                         
-                        // 流星雨逻辑
-                        float mt = mod(uTime * 1.5, 4.0); 
-                        vec2 mpos = vec2(2.0 - mt*2.0, 2.0 - mt*2.0); 
-                        vec2 mpa = uv - mpos;
-                        vec2 mdir = normalize(vec2(1.0, 1.0)); 
-                        float mh = clamp(dot(mpa, mdir), 0.0, 0.4); 
-                        float md = length(mpa - mdir * mh); 
-                        float meteor = smoothstep(0.005, 0.0, md) * smoothstep(0.4, 0.0, mh);
-                        meteor += smoothstep(0.015, 0.0, length(mpa)); 
-                        col += meteor * vec3(0.8, 0.9, 1.0) * 1.5;
+                        // 多重流星雨逻辑，不同位置，不同深浅
+                        for(float j=0.; j<2.; j++) {
+                            float mTime = uTime * (0.8 + j*0.3) + j*1.5;
+                            float mt = mod(mTime, 3.0 + j);
+                            float mcycle = floor(mTime / (3.0 + j));
+                            float rnd1 = hash(vec2(mcycle, j + 1.0));
+                            float rnd2 = hash(vec2(mcycle, j + 2.0));
+                            vec2 offset = vec2(rnd1 * 6.0 - 3.0, rnd2 * 4.0 - 2.0);
+                            vec2 mpos = vec2(3.0, 3.0) + offset - mt * vec2(3.0, 3.0);
+                            vec2 mpa = uv - mpos;
+                            vec2 mdir = normalize(vec2(1.0, 1.0));
+                            float mh = clamp(dot(mpa, mdir), 0.0, 0.4 + rnd1*0.2);
+                            float md = length(mpa - mdir * mh);
+                            float meteor = smoothstep(0.005, 0.0, md) * smoothstep(0.4, 0.0, mh);
+                            meteor += smoothstep(0.015, 0.0, length(mpa));
+                            col += meteor * vec3(0.8, 0.9, 1.0) * (0.2 + rnd1 * 1.5);
+                        }
 
                         gl_FragColor = vec4(col, 1.0);
                     }
@@ -264,23 +271,22 @@
         }
 
         // ==========================================
-        // 首屏收缩动画 (适配 iPhone 16)
+        // 首屏横展动画 (炫酷适配，不再变成长条状)
         // ==========================================
         function initHero() {
-            // 设置动画周期为 100% 滚动，完成后取消钉图自然流出
             const tl = gsap.timeline({ scrollTrigger: { trigger: ".hero-wrap", start: "top top", end: "+=100%", scrub: 1, pin: true }});
             tl.to(".hero-txt-center", { opacity: 0, scale: 0.8, duration: 0.5 }, 0)
               .to(".hero-img-box", { 
-                  width: isMobile ? "85vw" : "30vw", 
-                  height: isMobile ? "45vh" : "55vh", 
+                  width: isMobile ? "90vw" : "30vw", 
+                  height: isMobile ? "28vh" : "55vh", 
                   x: isMobile ? "0" : "-20vw", 
-                  y: isMobile ? "-25vh" : "-10vh", 
+                  y: isMobile ? "-30vh" : "-10vh", 
                   borderRadius: "24px", duration: 1, ease: "power2.inOut" 
               }, 0)
               .to(".hero-intro", { 
                   opacity: 1, 
                   x: isMobile ? "0" : "15vw", 
-                  y: isMobile ? "15vh" : "-5vh", 
+                  y: isMobile ? "12vh" : "-5vh", 
                   duration: 0.8 
               }, 0.4);
         }
@@ -299,7 +305,6 @@
             });
             
             const cards = document.querySelectorAll('.arc-card');
-            // 【重要修复】初始化就展开扇形，防止全叠在一张上
             const updateArc = (p) => {
                 cards.forEach((c, i) => {
                     const off = i - p * (cards.length - 1);
@@ -308,21 +313,22 @@
                     c.style.zIndex = 100 - Math.round(Math.abs(off) * 10);
                 });
             };
-            updateArc(0); // 初始调用
+            updateArc(0); 
             
+            // 加入强大的滑动阻尼
             gsap.to({}, { 
-                scrollTrigger: { trigger: ".arc-wrap", start: "top bottom", end: "bottom top", scrub: 0.5 },
+                scrollTrigger: { trigger: ".arc-wrap", start: "top bottom", end: "bottom top", scrub: 1.5 },
                 onUpdate: function() { updateArc(this.progress()); }
             });
 
-            // 4. Orbit
+            // 4. Orbit (加入强阻尼)
             const ringBox = document.getElementById('ring-box');
             globalImages.forEach((src, i) => {
                 const el = document.createElement('div'); el.className = 'ring-item';
                 el.style.backgroundImage = `url(${src})`; el.style.transform = `rotateY(${i * 72}deg) translateZ(${isMobile ? 220 : 300}px)`;
                 el.onclick = () => window.openModal("Orbit Ring", src); ringBox.appendChild(el);
             });
-            gsap.to(ringBox, { rotateY: 360, scrollTrigger: { trigger: ".ring-wrap", start: "top top", end: "bottom bottom", scrub: 1 }});
+            gsap.to(ringBox, { rotateY: 360, scrollTrigger: { trigger: ".ring-wrap", start: "top top", end: "bottom bottom", scrub: 1.5 }});
 
             // 6. Stack
             const stackBox = document.getElementById('stack-container');
@@ -334,7 +340,7 @@
         }
 
         // ==========================================
-        // 2. Flying Posters (调整为 3 张海报)
+        // 2. Flying Posters (3张卡片 & 强滑动阻尼)
         // ==========================================
         function initFlyingPosters() {
             const container = document.getElementById('posters-canvas');
@@ -342,7 +348,6 @@
             const camera = new Camera(gl, { fov: 45 }); camera.position.z = 20; const scene = new Transform();
             const geo = new Plane(gl, { width: 8, height: 10, widthSegments: 20 });
             
-            // 将 4 张切为 3 张
             const meshes = globalImages.slice(0, 3).map((src, i) => {
                 const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = src; img.onload = () => tex.image = img;
                 const program = new Program(gl, {
@@ -367,10 +372,10 @@
                 if (hits.length) window.openModal(hits[0].userData.title, hits[0].userData.src);
             });
 
-            gsap.to({}, { scrollTrigger: { trigger: ".posters-wrap", start: "top top", end: "bottom bottom", scrub: true },
+            gsap.to({}, { scrollTrigger: { trigger: ".posters-wrap", start: "top top", end: "bottom bottom", scrub: 1.5 },
                 onUpdate: function() {
                     const p = this.progress(); 
-                    const totalH = meshes.length * 15; // 3 * 15 = 45
+                    const totalH = meshes.length * 15; 
                     meshes.forEach((m, i) => {
                         let y = (i * 15 - p * totalH * 1.5) % totalH;
                         if (y < -totalH/2) y += totalH;
@@ -385,7 +390,7 @@
         }
 
         // ==========================================
-        // 5. Circular Gallery (OGL w/ Raycast)
+        // 5. Circular Gallery (强滑动阻尼)
         // ==========================================
         function initCircularGallery() {
             const container = document.getElementById('circular-canvas');
@@ -419,7 +424,7 @@
             });
 
             let currentScroll = 0;
-            gsap.to({}, { scrollTrigger: { trigger: ".circular-wrap", start: "top top", end: "bottom bottom", scrub: true },
+            gsap.to({}, { scrollTrigger: { trigger: ".circular-wrap", start: "top top", end: "bottom bottom", scrub: 1.5 },
                 onUpdate: function() { currentScroll = this.progress() * (meshes.length * 8); }
             });
 
@@ -454,8 +459,7 @@
         }
 
         // ==========================================
-        // 7. Lanyard (Vanilla Three.js) 
-        // 修复：卡片更宽，位置完全在 Connect 标题下方
+        // 7. Lanyard (锚点下移至 Connect 下方，绳子更紧凑)
         // ==========================================
         function initLanyard() {
             const canvas = document.getElementById('lanyard-canvas');
@@ -471,7 +475,6 @@
 
             const group = new THREE.Group();
             const tex = new THREE.TextureLoader().load(globalImages[0]);
-            // 【宽度提升】让信息展示不再溢出
             const cardGeo = new THREE.BoxGeometry(4.2, 5.8, 0.1); 
             const cardMat = new THREE.MeshPhysicalMaterial({ map: tex, metalness: 0.1, roughness: 0.5, clearcoat: 0.5 });
             const card = new THREE.Mesh(cardGeo, cardMat);
@@ -482,12 +485,12 @@
             
             group.add(card); group.add(clip); scene.add(group);
 
-            // 【锚点下降】完全挂载在 Connect 正下方
-            const anchor = new THREE.Vector3(0, 8, 0); 
-            const numNodes = 14; 
-            const linkLen = 0.8;
+            // 【彻底移至 Connect 下方】
+            const anchor = new THREE.Vector3(0, 4.5, 0); 
+            const numNodes = 10; // 减少绳索节点，让绳子变更紧凑
+            const linkLen = 0.7;
             const nodes =[]; 
-            for(let i=0; i<numNodes; i++) nodes.push({ pos: new THREE.Vector3(0, 8 - i*linkLen, 0), old: new THREE.Vector3(0, 8 - i*linkLen, 0) });
+            for(let i=0; i<numNodes; i++) nodes.push({ pos: new THREE.Vector3(0, 4.5 - i*linkLen, 0), old: new THREE.Vector3(0, 4.5 - i*linkLen, 0) });
             
             const lineGeo = new THREE.BufferGeometry();
             const posArray = new Float32Array(numNodes * 3);
@@ -502,7 +505,7 @@
                 const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
                 mouse.set(2*(x/innerWidth)-1, -2*(y/innerHeight)+1);
                 raycaster.setFromCamera(mouse, camera);
-                const hits = raycaster.intersectObject(card);
+                const hits = raycast.intersectObject(card);
                 if(hits.length) { 
                     isDragging = true; 
                     if(e.cancelable) e.preventDefault();
@@ -577,7 +580,7 @@
             initFlyingPosters();
             initCircularGallery();
             initLanyard();
-            gsap.to(".glass-fly", { opacity: 1, z: 0, stagger: 0.2, scrollTrigger: { trigger: ".glass-wrap", start: "top 80%", end: "bottom bottom", scrub: true }});
+            gsap.to(".glass-fly", { opacity: 1, z: 0, stagger: 0.2, scrollTrigger: { trigger: ".glass-wrap", start: "top 80%", end: "bottom bottom", scrub: 2 }});
             setTimeout(() => document.getElementById('loader').style.opacity = 0, 1000);
             setTimeout(() => document.getElementById('loader').remove(), 1800);
         };
