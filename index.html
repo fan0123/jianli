@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FANN | 视觉交互作品集</title>
+    <title>FANN | 顶级视觉交互作品集</title>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
@@ -18,10 +18,10 @@
         #galaxy-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
         .noise { position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.04; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E'); }
         #loader { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.8s; }
-        .loader-txt { font-family: 'Playfair Display'; color: var(--primary); font-size: 1.5rem; letter-spacing: 5px; }
+        .loader-txt { font-family: 'Playfair Display', serif; color: var(--primary); font-size: 1.5rem; letter-spacing: 5px; }
 
         .section-header { text-align: center; padding: 10svh 5vw; position: relative; z-index: 10; pointer-events: none; }
-        .section-header h2 { font-family: 'Playfair Display'; font-size: clamp(2rem, 8vw, 4rem); font-weight: 600; }
+        .section-header h2 { font-family: 'Noto Sans SC', sans-serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; }
         .section-header p { font-size: 0.8rem; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px; }
 
         /* 首屏动效 */
@@ -29,11 +29,10 @@
         .hero-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .hero-txt-center { position: absolute; z-index: 1; text-align: center; pointer-events: none; }
         .hero-txt-center h1 { font-family: 'Playfair Display'; font-size: clamp(4rem, 15vw, 12rem); font-style: italic; line-height: 1; }
-        /* 修复：使用 clamp 保证初始比例绝对是正常人像比例，杜绝长条状 */
         .hero-img-box { position: relative; z-index: 2; width: clamp(280px, 75vw, 450px); height: clamp(380px, 60svh, 600px); border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
         .hero-img-box img { width: 100%; height: 100%; object-fit: cover; }
         .hero-intro { position: absolute; z-index: 3; width: clamp(300px, 85vw, 400px); opacity: 0; }
-        .hero-intro h2 { font-family: 'Playfair Display'; font-size: clamp(2.2rem, 6vw, 3rem); color: var(--primary); margin-bottom: 20px; }
+        .hero-intro h2 { font-family: 'Noto Sans SC'; font-size: clamp(2.2rem, 6vw, 3rem); font-weight: 700; color: var(--primary); margin-bottom: 20px; }
 
         /* 项目1: Arc */
         .arc-wrap { height: 200svh; }
@@ -42,15 +41,15 @@
         .arc-card img { width: 100%; height: 60%; object-fit: cover; }
         .arc-info { padding: 25px; color: #111; flex-grow: 1; pointer-events: none; }
 
-        /* 项目2: Posters (增加高度，降低滑动速度) */
+        /* 项目2: Posters */
         .posters-wrap { height: 350svh; position: relative; z-index: 10; }
         .posters-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; cursor: grab; }
 
-        /* 项目3: Glass (增加间距，使之慢点划过) */
+        /* 项目3: Glass */
         .glass-wrap { padding: 20svh 5vw 30svh 5vw; position: relative; z-index: 10; }
         .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px; max-width: 600px; margin-bottom: 15svh; opacity: 0; transform: translateZ(-200px); }
 
-        /* 项目4: Orbit (增加高度，降低滑动速度) */
+        /* 项目4: Orbit */
         .ring-wrap { height: 300svh; position: relative; z-index: 10; }
         .ring-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 2000px; }
         .ring-container { position: relative; width: clamp(240px, 60vw, 300px); height: clamp(340px, 80vw, 400px); transform-style: preserve-3d; }
@@ -63,14 +62,14 @@
         /* 项目6: Stack */
         .stack-wrap { padding: 0 5vw 20svh 5vw; position: relative; z-index: 10; }
         .stack-card { position: sticky; top: 15svh; height: 60svh; width: 100%; border-radius: 24px; background-size: cover; background-position: center; margin-bottom: 10svh; display: flex; align-items: flex-end; padding: 40px; box-shadow: 0 -20px 50px rgba(0,0,0,0.5); cursor: pointer; }
-        .stack-card h3 { font-family: 'Playfair Display'; font-size: 3rem; color: #fff; text-shadow: 0 5px 20px rgba(0,0,0,0.8); pointer-events: none;}
+        .stack-card h3 { font-family: 'Noto Sans SC'; font-weight: 700; font-size: 2.5rem; color: #fff; text-shadow: 0 5px 20px rgba(0,0,0,0.8); pointer-events: none;}
 
         /* Lanyard 结尾 */
         .footer-wrap { height: 100svh; position: relative; display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: pan-y;}
         #lanyard-canvas { position: absolute; inset: 0; z-index: 1; cursor: grab; touch-action: pan-y; }
         #lanyard-canvas:active { cursor: grabbing; }
-        .footer-bg-txt { position: absolute; top: 50%; transform: translateY(-50%); font-family: 'Playfair Display'; font-size: 15vw; opacity: 0.05; text-align: center; pointer-events: none; line-height: 0.9; width: 100%; }
-        #html-label { position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, -50%); color: #111; text-align: center; font-family: sans-serif; background: transparent; width: 280px; padding: 10px; opacity: 0;}
+        .footer-bg-txt { position: absolute; top: 50%; transform: translateY(-50%); font-family: 'Noto Sans SC'; font-weight: 700; font-size: 15vw; opacity: 0.03; text-align: center; pointer-events: none; line-height: 1; width: 100%; }
+        #html-label { position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, -50%); color: #111; text-align: center; font-family: 'Noto Sans SC', sans-serif; background: transparent; width: 280px; padding: 10px; opacity: 0;}
 
         /* Modal */
         #modal { position: fixed; inset: 0; background: var(--bg); z-index: 100000; clip-path: inset(50% 0 50% 0); transition: all 0.7s cubic-bezier(0.7, 0, 0.2, 1); overflow-y: auto; opacity: 0; pointer-events: none; }
@@ -92,8 +91,8 @@
 
     <!-- 统一详情页 Modal -->
     <div id="modal">
-        <div class="modal-close" onclick="closeModal()">✕ CLOSE</div>
-        <div class="modal-hero" id="m-hero"><h1 style="font-family:'Playfair Display'; font-size: clamp(2.5rem, 8vw, 5rem); position:relative; z-index:2; color:#fff;" id="m-title"></h1></div>
+        <div class="modal-close" onclick="closeModal()">✕ 关闭</div>
+        <div class="modal-hero" id="m-hero"><h1 style="font-family:'Noto Sans SC'; font-weight:700; font-size: clamp(2rem, 6vw, 4rem); position:relative; z-index:2; color:#fff;" id="m-title"></h1></div>
         <div class="modal-body">
             <p>打破二维平面的局限，将先锋的图形技术与深厚的商业逻辑深度融合。让每一次点击都成为感官的享受，让每一次设计都成为驱动商业增长的视觉引擎。</p>
             <div class="modal-grid" id="m-grid"></div>
@@ -107,26 +106,26 @@
             <div class="hero-sticky">
                 <div class="hero-txt-center">
                     <h1>Fann.</h1>
-                    <p style="color: var(--primary); letter-spacing: 8px; font-size: 1.2rem; margin-top: 20px;">VISUAL EXPERT</p>
+                    <p style="color: var(--primary); letter-spacing: 8px; font-size: 1.2rem; margin-top: 20px;">高级视觉交互专家</p>
                 </div>
                 <div class="hero-img-box" id="hero-img">
                     <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80">
                 </div>
                 <div class="hero-intro">
-                    <h2>Design is Logic.</h2>
-                    <p style="color: #a0aab5; line-height: 2; font-weight: 300;">深耕视觉与交互领域9年。打破传统二维平面的局限，将先锋的图形技术与深厚的商业逻辑深度融合。<br><br>让设计不仅仅是美学，更是驱动商业增长的引擎。</p>
+                    <h2>设计即商业引擎</h2>
+                    <p style="color: #a0aab5; line-height: 2; font-weight: 300;">深耕视觉与交互领域9年。打破传统二维平面的局限，将先锋的图形技术与深厚的商业逻辑深度融合。<br><br>让设计不仅仅是美学，更是驱动商业指数级增长的核心枢纽。</p>
                 </div>
             </div>
         </section>
 
         <!-- 1. Arc Gallery -->
-        <div class="section-header"><h2>01. Insights</h2><p>Swipe to Explore</p></div>
+        <div class="section-header"><h2>01. 核心洞察</h2><p>横向滑动探索边界</p></div>
         <section class="arc-wrap">
             <div class="arc-sticky" id="arc-container"></div>
         </section>
 
         <!-- 2. Flying Posters -->
-        <div class="section-header"><h2>02. Dimension</h2><p>Click Any Poster</p></div>
+        <div class="section-header"><h2>02. 维度解构</h2><p>全息交互视界 (点击预览)</p></div>
         <section class="posters-wrap">
             <div class="posters-sticky" id="posters-canvas"></div>
         </section>
@@ -134,42 +133,42 @@
         <!-- 3. Glass Panels -->
         <section class="glass-wrap">
             <div class="glass-card glass-fly">
-                <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 20px;">极致交互</h3>
-                <p style="color: #aaa; line-height: 2;">不仅是界面的堆叠，更是对光影、材质与心理预期的精确把控。每一像素都承载着品牌温度与逻辑深度。</p>
+                <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 20px;">感官秩序</h3>
+                <p style="color: #aaa; line-height: 2;">不仅是界面的堆叠，更是对光影、材质与心理预期的精确把控。每一像素都承载着品牌温度与逻辑深度，在无声中建立用户信任。</p>
             </div>
             <div class="glass-card glass-fly" style="margin-left: auto;">
                 <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 20px;">技术赋能</h3>
-                <p style="color: #aaa; line-height: 2;">从动效原型的构建到 WebGL 性能优化，我们打通了创意到落地的最后一公里，实现感官与数据的双重增长。</p>
+                <p style="color: #aaa; line-height: 2;">从动效原型的构建到 WebGL 性能优化，我们打通了创意到落地的最后一公里，跨越平台壁垒，实现视觉感官与商业数据的双重爆发。</p>
             </div>
         </section>
 
         <!-- 4. Orbital Ring -->
-        <div class="section-header"><h2>03. Orbit</h2><p>Infinite Loop</p></div>
+        <div class="section-header"><h2>03. 宇宙回响</h2><p>无界星环生态</p></div>
         <section class="ring-wrap">
             <div class="ring-sticky"><div class="ring-container" id="ring-box"></div></div>
         </section>
 
         <!-- 5. Circular Gallery -->
-        <div class="section-header"><h2>04. Distortion</h2><p>Curved Space</p></div>
+        <div class="section-header"><h2>04. 空间引力</h2><p>曲面视觉画廊</p></div>
         <section class="circular-wrap">
             <div class="circular-sticky" id="circular-canvas"></div>
         </section>
 
         <!-- 6. Stack -->
-        <div class="section-header"><h2>05. Projects</h2><p>Sticky Perspective</p></div>
+        <div class="section-header"><h2>05. 商业图景</h2><p>全景视差解析</p></div>
         <section class="stack-wrap" id="stack-container"></section>
 
         <!-- 7. Lanyard Footer -->
         <footer class="footer-wrap">
-            <div class="footer-bg-txt">DRIVE<br>GROWTH</div>
+            <div class="footer-bg-txt">连接未来</div>
             <div class="section-header" style="position: absolute; top: 12svh; width: 100%; z-index: 0;" id="connect-anchor">
-                <h2>Connect</h2><p>Drag My Card</p>
+                <h2>联系我</h2><p>拖拽互动工牌</p>
             </div>
             <canvas id="lanyard-canvas"></canvas>
             
             <!-- 增宽的 HTML 悬浮联系面板 -->
             <div id="html-label">
-                <h3 style="margin: 0 0 15px 0; font-size: clamp(20px, 5vw, 26px); font-weight: 800; letter-spacing: 2px;">FANN</h3>
+                <h3 style="margin: 0 0 15px 0; font-size: clamp(20px, 5vw, 26px); font-weight: 800; letter-spacing: 2px;">范精灵 FANN</h3>
                 <p style="margin: 6px 0; font-size: clamp(14px, 3.5vw, 16px); font-weight: 600;">hello@fann.design</p>
                 <p style="margin: 6px 0; font-size: clamp(14px, 3.5vw, 16px); font-weight: bold; color: #d4af37;">+86 138 0000 0000</p>
             </div>
@@ -187,12 +186,13 @@
         gsap.registerPlugin(ScrollTrigger);
         const isMobile = window.innerWidth < 768;
 
-        const globalImages =[
-            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800",
-            "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800",
-            "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800",
-            "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800",
-            "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=800"
+        // 全局定制化的高级中文项目数据
+        const projectsData =[
+            { img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800", title: "元宇宙视界交互" },
+            { img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800", title: "数字孪生全景系统" },
+            { img: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800", title: "无界生态架构设计" },
+            { img: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800", title: "暗物质商业体系" },
+            { img: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=800", title: "高维空间界面重塑" }
         ];
 
         // ==========================================
@@ -201,7 +201,7 @@
         window.openModal = (title, img) => {
             document.getElementById('m-title').innerText = title;
             document.getElementById('m-hero').style.backgroundImage = `url(${img})`;
-            document.getElementById('m-grid').innerHTML = globalImages.slice(0, 3).map(src => `<img src="${src}">`).join('');
+            document.getElementById('m-grid').innerHTML = projectsData.slice(0, 3).map(p => `<img src="${p.img}">`).join('');
             document.getElementById('modal').classList.add('active');
             document.body.style.overflow = 'hidden';
         };
@@ -211,7 +211,7 @@
         };
 
         // ==========================================
-        // 0. 流星星空背景 (多流星位置深浅随机算法)
+        // 0. 流星星空背景
         // ==========================================
         function initGalaxy() {
             const renderer = new Renderer({ alpha: true });
@@ -235,7 +235,7 @@
                             col += (0.005 / length(g - vec2(n-0.5, fract(n*10.)-0.5))) * d * smoothstep(1., 0.8, d) * vec3(n, 0.6, 1.);
                         }
                         
-                        // 多重流星雨逻辑，不同位置，不同深浅
+                        // 流星雨
                         for(float j=0.; j<2.; j++) {
                             float mTime = uTime * (0.8 + j*0.3) + j*1.5;
                             float mt = mod(mTime, 3.0 + j);
@@ -271,7 +271,7 @@
         }
 
         // ==========================================
-        // 首屏横展动画 (炫酷适配，不再变成长条状)
+        // 首屏横展动画
         // ==========================================
         function initHero() {
             const tl = gsap.timeline({ scrollTrigger: { trigger: ".hero-wrap", start: "top top", end: "+=100%", scrub: 1, pin: true }});
@@ -292,15 +292,15 @@
         }
 
         // ==========================================
-        // 1. Arc Gallery & Stack
+        // 1. Arc Gallery & DOM 项目
         // ==========================================
         function initDOMProjects() {
-            const arcTitles =["秩序", "共鸣", "突破", "新生"];
+            const arcTitles =["秩序重构", "情感共鸣", "视界突破", "交互新生"];
             const arcBox = document.getElementById('arc-container');
             arcTitles.forEach((t, i) => {
                 const card = document.createElement('div'); card.className = 'arc-card';
-                card.innerHTML = `<img src="${globalImages[i]}"><div class="arc-info"><h3 style="font-size:1.5rem; font-family:'Playfair Display'; margin-bottom:10px;">${t}</h3><p style="color:#666;">深度重构视觉语言，用设计驱动商业</p></div>`;
-                card.onclick = () => window.openModal(`Project: ${t}`, globalImages[i]);
+                card.innerHTML = `<img src="${projectsData[i].img}"><div class="arc-info"><h3 style="font-size:1.5rem; font-family:'Noto Sans SC'; font-weight:700; margin-bottom:10px;">${t}</h3><p style="color:#666;">深度重构视觉语言，以先锋交互赋能</p></div>`;
+                card.onclick = () => window.openModal(t, projectsData[i].img);
                 arcBox.appendChild(card);
             });
             
@@ -315,32 +315,32 @@
             };
             updateArc(0); 
             
-            // 加入强大的滑动阻尼
             gsap.to({}, { 
                 scrollTrigger: { trigger: ".arc-wrap", start: "top bottom", end: "bottom top", scrub: 1.5 },
                 onUpdate: function() { updateArc(this.progress()); }
             });
 
-            // 4. Orbit (加入强阻尼)
+            // 4. Orbit
             const ringBox = document.getElementById('ring-box');
-            globalImages.forEach((src, i) => {
+            projectsData.forEach((p, i) => {
                 const el = document.createElement('div'); el.className = 'ring-item';
-                el.style.backgroundImage = `url(${src})`; el.style.transform = `rotateY(${i * 72}deg) translateZ(${isMobile ? 220 : 300}px)`;
-                el.onclick = () => window.openModal("Orbit Ring", src); ringBox.appendChild(el);
+                el.style.backgroundImage = `url(${p.img})`; el.style.transform = `rotateY(${i * 72}deg) translateZ(${isMobile ? 220 : 300}px)`;
+                el.onclick = () => window.openModal(p.title, p.img); ringBox.appendChild(el);
             });
             gsap.to(ringBox, { rotateY: 360, scrollTrigger: { trigger: ".ring-wrap", start: "top top", end: "bottom bottom", scrub: 1.5 }});
 
             // 6. Stack
+            const stackTitles = ["商业赋能方案", "多终端生态架构", "前瞻性探索体系"];
             const stackBox = document.getElementById('stack-container');
-            globalImages.slice(0,3).forEach((src, i) => {
+            projectsData.slice(0,3).forEach((p, i) => {
                 const el = document.createElement('div'); el.className = 'stack-card';
-                el.style.backgroundImage = `url(${src})`; el.innerHTML = `<h3>Perspective 0${i+1}</h3>`;
-                el.onclick = () => window.openModal(`Perspective 0${i+1}`, src); stackBox.appendChild(el);
+                el.style.backgroundImage = `url(${p.img})`; el.innerHTML = `<h3>${stackTitles[i]}</h3>`;
+                el.onclick = () => window.openModal(stackTitles[i], p.img); stackBox.appendChild(el);
             });
         }
 
         // ==========================================
-        // 2. Flying Posters (3张卡片 & 强滑动阻尼)
+        // 2. Flying Posters (速度变慢)
         // ==========================================
         function initFlyingPosters() {
             const container = document.getElementById('posters-canvas');
@@ -348,18 +348,20 @@
             const camera = new Camera(gl, { fov: 45 }); camera.position.z = 20; const scene = new Transform();
             const geo = new Plane(gl, { width: 8, height: 10, widthSegments: 20 });
             
-            const meshes = globalImages.slice(0, 3).map((src, i) => {
-                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = src; img.onload = () => tex.image = img;
+            const titles =["数字脉冲", "全息幻影", "暗物质交互"];
+            const meshes = projectsData.slice(0, 3).map((p, i) => {
+                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = p.img; img.onload = () => tex.image = img;
                 const program = new Program(gl, {
+                    // 修改：减小了 uPos 乘数，让旋转幅度/速度变慢
                     vertex: `attribute vec3 position; attribute vec2 uv; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; uniform float uPos; varying vec2 vUv;
                         mat4 rotY(float a) { float s=sin(a), c=cos(a), oc=1.-c; return mat4(oc*0.+c, 0., -s, 0., 0., c, 0., 0., s, 0., oc*0.+c, 0., 0., 0., 0., 1.); }
-                        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * rotY(clamp(uPos*5.,0.,3.14)) * vec4(position, 1.0); }`,
+                        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * rotY(clamp(uPos*3.0,0.,3.14159)) * vec4(position, 1.0); }`,
                     fragment: `precision highp float; uniform sampler2D tMap; varying vec2 vUv; void main() { gl_FragColor = texture2D(tMap, vUv); }`,
                     uniforms: { tMap: { value: tex }, uPos: { value: 0 } }, cullFace: false
                 });
                 const mesh = new Mesh(gl, { geometry: geo, program });
                 mesh.position.y = i * 15; mesh.setParent(scene);
-                mesh.userData = { src, title: `Poster 0${i+1}` }; 
+                mesh.userData = { src: p.img, title: titles[i] }; 
                 return mesh;
             });
 
@@ -377,7 +379,8 @@
                     const p = this.progress(); 
                     const totalH = meshes.length * 15; 
                     meshes.forEach((m, i) => {
-                        let y = (i * 15 - p * totalH * 1.5) % totalH;
+                        // 修改：系数从 1.5 降到 1.0，滚动更慢
+                        let y = (i * 15 - p * totalH * 1.0) % totalH;
                         if (y < -totalH/2) y += totalH;
                         m.position.y = y; m.program.uniforms.uPos.value = Math.abs(y) / 10;
                     });
@@ -390,7 +393,7 @@
         }
 
         // ==========================================
-        // 5. Circular Gallery (强滑动阻尼)
+        // 5. Circular Gallery 
         // ==========================================
         function initCircularGallery() {
             const container = document.getElementById('circular-canvas');
@@ -400,17 +403,17 @@
 
             let viewport = { width: 0, height: 0 };
             
-            const meshes = globalImages.map((src, index) => {
-                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = src; img.onload = () => tex.image = img;
+            const meshes = projectsData.map((p, index) => {
+                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = p.img; img.onload = () => tex.image = img;
                 const program = new Program(gl, {
                     vertex: `attribute vec3 position; attribute vec2 uv; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; uniform float uTime, uSpeed; varying vec2 vUv;
-                        void main() { vUv = uv; vec3 p = position; p.z = (sin(p.x*4.+uTime)*1.5 + cos(p.y*2.+uTime)*1.5) * (0.1+uSpeed*0.5);
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`,
+                        void main() { vUv = uv; vec3 pos = position; pos.z = (sin(pos.x*4.+uTime)*1.5 + cos(pos.y*2.+uTime)*1.5) * (0.1+uSpeed*0.5);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0); }`,
                     fragment: `precision highp float; uniform sampler2D tMap; varying vec2 vUv; void main() { gl_FragColor = texture2D(tMap, vUv); }`,
                     uniforms: { tMap: { value: tex }, uTime: { value: Math.random()*100 }, uSpeed: { value: 0 } }, transparent: true
                 });
                 const mesh = new Mesh(gl, { geometry: geo, program }); mesh.setParent(scene);
-                mesh.userData = { index, src, title: `Distortion ${index+1}` };
+                mesh.userData = { index, src: p.img, title: p.title };
                 return mesh;
             });
 
@@ -459,7 +462,7 @@
         }
 
         // ==========================================
-        // 7. Lanyard (锚点下移至 Connect 下方，绳子更紧凑)
+        // 7. Lanyard (拖拽已完全修复)
         // ==========================================
         function initLanyard() {
             const canvas = document.getElementById('lanyard-canvas');
@@ -474,7 +477,7 @@
             const dir = new THREE.DirectionalLight(0xffffff, 2); dir.position.set(5, 5, 10); scene.add(dir);
 
             const group = new THREE.Group();
-            const tex = new THREE.TextureLoader().load(globalImages[0]);
+            const tex = new THREE.TextureLoader().load(projectsData[0].img);
             const cardGeo = new THREE.BoxGeometry(4.2, 5.8, 0.1); 
             const cardMat = new THREE.MeshPhysicalMaterial({ map: tex, metalness: 0.1, roughness: 0.5, clearcoat: 0.5 });
             const card = new THREE.Mesh(cardGeo, cardMat);
@@ -485,9 +488,8 @@
             
             group.add(card); group.add(clip); scene.add(group);
 
-            // 【彻底移至 Connect 下方】
             const anchor = new THREE.Vector3(0, 4.5, 0); 
-            const numNodes = 10; // 减少绳索节点，让绳子变更紧凑
+            const numNodes = 10; 
             const linkLen = 0.7;
             const nodes =[]; 
             for(let i=0; i<numNodes; i++) nodes.push({ pos: new THREE.Vector3(0, 4.5 - i*linkLen, 0), old: new THREE.Vector3(0, 4.5 - i*linkLen, 0) });
@@ -498,27 +500,34 @@
             const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
             const line = new THREE.Line(lineGeo, lineMat); scene.add(line);
 
-            let isDragging = false; const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
-            let dragOffset = new THREE.Vector3(); const dragPlane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+            let isDragging = false; 
+            const raycaster = new THREE.Raycaster(); 
+            const mouse = new THREE.Vector2();
+            let dragOffset = new THREE.Vector3(); 
+            const dragPlane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
             
+            // 修复拖拽的核心逻辑
             const onDown = e => {
-                const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
+                const x = e.touches ? e.touches[0].clientX : e.clientX; 
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
                 mouse.set(2*(x/innerWidth)-1, -2*(y/innerHeight)+1);
                 raycaster.setFromCamera(mouse, camera);
-                const hits = raycast.intersectObject(card);
+                const hits = raycaster.intersectObject(card); // 修复原代码报错点
                 if(hits.length) { 
                     isDragging = true; 
+                    raycaster.ray.intersectPlane(dragPlane, dragOffset); // 初始化拖拽点位
                     if(e.cancelable) e.preventDefault();
                     document.body.style.cursor = "grabbing"; 
                 }
             };
             const onMove = e => {
                 if(!isDragging) return;
-                const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
+                const x = e.touches ? e.touches[0].clientX : e.clientX; 
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
                 mouse.set(2*(x/innerWidth)-1, -2*(y/innerHeight)+1);
                 raycaster.setFromCamera(mouse, camera);
                 raycaster.ray.intersectPlane(dragPlane, dragOffset);
-                if(e.cancelable) e.preventDefault();
+                if(e.cancelable) e.preventDefault(); // 处于拖拽状态时阻止自然滚动
             };
             const onUp = () => { isDragging = false; document.body.style.cursor = "auto"; };
 
@@ -557,7 +566,6 @@
                 nodes.forEach((n, i) => { posArray[i*3]=n.pos.x; posArray[i*3+1]=n.pos.y; posArray[i*3+2]=n.pos.z; });
                 lineGeo.attributes.position.needsUpdate = true;
 
-                // Html 信息同步位置投影
                 const screenVec = endNode.pos.clone().project(camera);
                 htmlLabel.style.left = `${(screenVec.x * .5 + .5) * innerWidth}px`;
                 htmlLabel.style.top = `${(-(screenVec.y * .5) + .5) * innerHeight}px`;
