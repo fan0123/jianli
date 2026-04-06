@@ -3,615 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>范精灵 FANN | 顶级视觉交互作品集</title>
+    <title>FANN | 视觉交互专家作品集</title>
     
     <style>
-        /* ==========================================
-           1. 高级柔和排版与丝滑配置
-        ========================================== */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
         
-        :root { 
-            --safe-top: env(safe-area-inset-top, 20px); 
-            --safe-bottom: env(safe-area-inset-bottom, 20px); 
-            --primary: #d4af37; /* 柔和的高级金/香槟色 */
-            --bg: #0c0c0f; /* 更柔和的深空灰底色 */
-            --text-main: #f0f0f5;
-        }
-        
+        :root { --primary: #d4af37; --bg: #050507; --text: #f0f0f5; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body, html {
-            background-color: var(--bg); color: var(--text-main);
-            font-family: 'Noto Sans SC', sans-serif;
-            overflow-x: hidden; overflow-y: auto; 
-            overscroll-behavior-y: none; -webkit-overflow-scrolling: touch;
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC', sans-serif; overflow-x: hidden; }
+        canvas { display: block; touch-action: pan-y; }
         ::-webkit-scrollbar { display: none; }
 
-        /* 柔和弥散光背景 */
-        .ambient-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%), radial-gradient(circle at 50% 100%, rgba(0, 200, 255, 0.05) 0%, transparent 60%); }
-        .noise-overlay { position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.03; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E'); }
+        /* 背景与加载 */
+        #galaxy-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .noise { position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0.04; background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E'); }
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.8s; }
+        .loader-txt { font-family: 'Playfair Display'; color: var(--primary); font-size: 1.5rem; letter-spacing: 5px; }
 
-        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 100000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease; }
-        .loader-text { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 5vw, 3rem); color: var(--primary); letter-spacing: 8px; font-style: italic; }
+        .section-header { text-align: center; padding: 10svh 5vw; position: relative; z-index: 10; pointer-events: none; }
+        .section-header h2 { font-family: 'Playfair Display'; font-size: clamp(2rem, 8vw, 4rem); font-weight: 600; }
+        .section-header p { font-size: 0.8rem; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px; }
 
-        .content-layer { position: relative; z-index: 10; }
-        
-        /* 统一标题风格 - 柔和高级感 */
-        .section-header { text-align: center; padding: 15svh 5vw 5svh 5vw; position: relative; z-index: 10; pointer-events: none;}
-        .section-header h2 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); color: var(--text-main); font-weight: 600; letter-spacing: 2px; margin-bottom: 10px;}
-        .section-header p { font-family: 'Noto Sans SC'; color: #a0aab5; font-size: clamp(0.9rem, 3.5vw, 1.2rem); letter-spacing: 6px; font-weight: 300;}
+        /* 首屏动效 */
+        .hero-wrap { height: 250svh; position: relative; }
+        .hero-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .hero-txt-center { position: absolute; z-index: 1; text-align: center; pointer-events: none; }
+        .hero-txt-center h1 { font-family: 'Playfair Display'; font-size: clamp(4rem, 15vw, 12rem); font-style: italic; line-height: 1; }
+        .hero-img-box { position: relative; z-index: 2; width: 60vw; height: 80svh; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        .hero-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-intro { position: absolute; z-index: 3; width: clamp(300px, 30vw, 400px); opacity: 0; }
+        .hero-intro h2 { font-family: 'Playfair Display'; font-size: clamp(2rem, 4vw, 3rem); color: var(--primary); margin-bottom: 20px; }
 
-        /* ==========================================
-           2. 银河粒子开场 (Galaxy Shader)
-        ========================================== */
-        .hero-section { height: 100svh; width: 100vw; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #galaxy-canvas { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        
-        .hero-content { z-index: 2; text-align: center; pointer-events: none; padding: 0 5vw;}
-        .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3.5rem, 12vw, 7rem); font-weight: 600; font-style: italic; color: #fff; margin-bottom: 10px; text-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .hero-subtitle { font-size: clamp(1rem, 4vw, 1.5rem); color: var(--primary); font-weight: 500; letter-spacing: 4px; margin-bottom: 30px; }
-        .hero-desc { font-size: clamp(0.95rem, 3.5vw, 1.1rem); color: #b0c0d0; line-height: 2; max-width: 650px; margin: 0 auto; font-weight: 300;}
+        /* 项目1: Arc */
+        .arc-wrap { height: 200svh; }
+        .arc-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 2000px; }
+        .arc-card { position: absolute; width: clamp(260px, 60vw, 340px); height: clamp(380px, 80vw, 480px); background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); display: flex; flex-direction: column; cursor: pointer; transform-origin: center; transition: transform 0.1s; }
+        .arc-card img { width: 100%; height: 60%; object-fit: cover; }
+        .arc-info { padding: 25px; color: #111; flex-grow: 1; pointer-events: none; }
 
-        /* ==========================================
-           3. Project 1: 弧形画廊 (Circular Gallery)
-        ========================================== */
-        .arc-section { height: 100svh; width: 100vw; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: pan-y; }
-        .arc-container { position: relative; width: 100%; height: 100%; perspective: 2000px; transform-style: preserve-3d; }
-        
-        .arc-card { 
-            position: absolute; left: 50%; top: 50%;
-            /* 柔和的卡片比例，参考图片 */
-            width: clamp(260px, 60vw, 360px); height: clamp(360px, 80vw, 500px); 
-            background-color: #f2efe9; /* 柔和米白色 */
-            border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); 
-            cursor: pointer; will-change: transform;
-            transform-origin: center center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px;
-            /* 文本样式 */
-            color: #3a3a3a; text-align: center;
-        }
-        .arc-card h3 { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 6vw, 2.2rem); margin-bottom: 15px; }
-        .arc-card p { font-size: clamp(0.9rem, 3.5vw, 1rem); line-height: 1.8; opacity: 0.8;}
-        
-        /* 遮罩，营造景深 */
-        .arc-card::after { content: ''; position: absolute; inset: 0; background: #000; opacity: 0.5; border-radius: 20px; transition: opacity 0.4s ease; pointer-events: none;}
-        .arc-card.active::after { opacity: 0; }
+        /* 项目2: Posters */
+        .posters-wrap { height: 250svh; position: relative; z-index: 10; }
+        .posters-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; cursor: grab; }
 
-        /* ==========================================
-           4. 其他作品集模块 (精修)
-        ========================================== */
-        /* 空间碎片 */
-        .features-section { padding: 5svh 5vw 15svh 5vw; perspective: 1000px; overflow: hidden; }
-        .glass-panel { position: relative; background: rgba(20, 25, 35, 0.4); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 24px; padding: 8vw; margin-bottom: 5svh; box-shadow: 0 30px 60px rgba(0,0,0,0.5); max-width: 600px;}
-        .glass-panel.right { margin-left: auto; }
-        .glass-panel h3 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 7vw, 2.8rem); margin-bottom: 15px; color: #fff;}
-        .glass-panel p { color: #a0b0c0; font-size: clamp(0.95rem, 4vw, 1.1rem); line-height: 2; font-weight: 300;}
+        /* 项目3: Glass */
+        .glass-wrap { padding: 10svh 5vw; position: relative; z-index: 10; }
+        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px; max-width: 600px; margin-bottom: 10svh; opacity: 0; transform: translateZ(-200px); }
 
-        /* 星环 */
-        .orbital-section { height: 100svh; width: 100vw; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; touch-action: pan-y; }
-        .ring-wrapper { perspective: 2000px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; transform-style: preserve-3d; }
-        .ring { position: relative; width: clamp(200px, 50vw, 300px); height: clamp(280px, 70vw, 420px); transform-style: preserve-3d; }
-        .ring-card { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); cursor: pointer; }
+        /* 项目4: Orbit */
+        .ring-wrap { height: 200svh; position: relative; z-index: 10; }
+        .ring-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 2000px; }
+        .ring-container { position: relative; width: 300px; height: 400px; transform-style: preserve-3d; }
+        .ring-item { position: absolute; inset: 0; border-radius: 15px; background-size: cover; background-position: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* 视差折叠 */
-        .stack-section { padding: 5svh 5vw 20svh 5vw; position: relative; }
-        .stack-card { 
-            position: sticky; top: calc(var(--safe-top) + 12svh); 
-            height: 60svh; width: 100%; border-radius: 20px; background-size: cover; background-position: center; 
-            margin-bottom: 5svh; box-shadow: 0 -20px 50px rgba(0,0,0,0.8); 
-            display: flex; align-items: flex-end; padding: 6vw; transform-origin: top center; overflow: hidden;
-            will-change: transform, opacity; cursor: pointer;
-        }
-        .stack-card h3 { position: relative; z-index: 2; font-family: 'Playfair Display', serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 600; color: #fff; text-shadow: 0 10px 30px rgba(0,0,0,0.9); letter-spacing: 2px;}
-        .stack-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 60%); pointer-events: none;}
+        /* 项目5: Circular Gallery (New) */
+        .circular-wrap { height: 250svh; position: relative; z-index: 10; }
+        .circular-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; cursor: pointer; }
 
-        /* ==========================================
-           5. 尾屏 3D 物理绳索工牌 (Lanyard)
-        ========================================== */
-        .footer-section { height: 100svh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; touch-action: none;}
-        #lanyard-canvas { position: absolute; inset: 0; z-index: 1; touch-action: none; cursor: grab;}
+        /* 项目6: Stack */
+        .stack-wrap { padding: 0 5vw 20svh 5vw; position: relative; z-index: 10; }
+        .stack-card { position: sticky; top: 15svh; height: 60svh; width: 100%; border-radius: 24px; background-size: cover; background-position: center; margin-bottom: 10svh; display: flex; align-items: flex-end; padding: 40px; box-shadow: 0 -20px 50px rgba(0,0,0,0.5); cursor: pointer; }
+        .stack-card h3 { font-family: 'Playfair Display'; font-size: 3rem; color: #fff; text-shadow: 0 5px 20px rgba(0,0,0,0.8); pointer-events: none;}
+
+        /* Lanyard 结尾 */
+        .footer-wrap { height: 100svh; position: relative; display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: pan-y;}
+        #lanyard-canvas { position: absolute; inset: 0; z-index: 1; cursor: grab; touch-action: pan-y; }
         #lanyard-canvas:active { cursor: grabbing; }
-        
-        .footer-text-bg { position: absolute; z-index: 0; text-align: center; pointer-events: none; opacity: 0.4;}
-        .footer-text-bg h1 { font-family: 'Playfair Display', serif; font-size: clamp(4rem, 15vw, 10rem); color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); line-height: 1;}
+        .footer-bg-txt { position: absolute; top: 50%; transform: translateY(-50%); font-family: 'Playfair Display'; font-size: 15vw; opacity: 0.05; text-align: center; pointer-events: none; line-height: 0.9; width: 100%; }
+        #html-label { position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, -50%); color: #111; text-align: center; font-family: sans-serif; background: transparent; padding: 10px; opacity: 0;}
 
-        /* ==========================================
-           6. 优雅详情页 Modal
-        ========================================== */
-        #unfold-modal {
-            position: fixed; inset: 0; background: var(--bg); z-index: 100000;
-            clip-path: inset(50% 0 50% 0); -webkit-clip-path: inset(50% 0 50% 0);
-            transition: clip-path 0.7s cubic-bezier(0.77, 0, 0.175, 1), -webkit-clip-path 0.7s cubic-bezier(0.77, 0, 0.175, 1);
-            display: block; overflow-y: auto; overflow-x: hidden; opacity: 0; pointer-events: none;
-            -webkit-overflow-scrolling: touch; overscroll-behavior-y: none;
-        }
-        #unfold-modal.active { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); opacity: 1; pointer-events: auto; }
-
-        .modal-close-btn { 
-            position: fixed; top: var(--safe-top); right: 5vw; margin-top: 15px; font-size: clamp(0.8rem, 3vw, 0.9rem); color: #fff; 
-            cursor: pointer; z-index: 100001; font-weight: bold; letter-spacing: 2px;
-            background: rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 30px; 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .modal-hero { height: 45svh; width: 100%; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 6vw; position: relative; }
-        .modal-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, transparent 80%); }
-        .modal-title-huge { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 10vw, 5rem); font-weight: 600; color: #fff; position: relative; z-index: 2; text-shadow: 0 10px 30px rgba(0,0,0,0.9); line-height: 1.1; letter-spacing: 2px;}
-        
-        .modal-body { padding: 6svh 6vw calc(var(--safe-bottom) + 15svh) 6vw; max-width: 900px; margin: 0 auto; }
-        .modal-desc-text { font-size: clamp(0.95rem, 4vw, 1.1rem); color: #a0b0c0; line-height: 2; margin-bottom: 50px; font-weight: 300; }
-        
-        .modal-gallery { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .modal-gallery img { width: 100%; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.6); }
-
+        /* Modal */
+        #modal { position: fixed; inset: 0; background: var(--bg); z-index: 100000; clip-path: inset(50% 0 50% 0); transition: all 0.7s cubic-bezier(0.7, 0, 0.2, 1); overflow-y: auto; opacity: 0; pointer-events: none; }
+        #modal.active { clip-path: inset(0 0 0 0); opacity: 1; pointer-events: auto; }
+        .modal-close { position: fixed; top: 40px; right: 5vw; padding: 12px 24px; background: rgba(255,255,255,0.1); border-radius: 40px; cursor: pointer; z-index: 2; backdrop-filter: blur(10px); }
+        .modal-hero { height: 50svh; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 5vw; position: relative; }
+        .modal-hero::after { content:''; position:absolute; inset:0; background: linear-gradient(to top, var(--bg), transparent); }
+        .modal-body { padding: 60px 6vw; max-width: 900px; margin: 0 auto; color: #aaa; line-height: 2; font-size: 1.1rem; }
+        .modal-grid { display: grid; gap: 30px; margin-top: 50px; }
+        .modal-grid img { width: 100%; border-radius: 16px; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="loader-text">FANN EXPERTISE</div></div>
-    
-    <div class="ambient-glow"></div>
-    <div class="noise-overlay"></div>
+    <div id="loader"><div class="loader-txt">LOADING EXPERTISE</div></div>
+    <div id="galaxy-bg"></div><div class="noise"></div>
+
+    <!-- 统一详情页 Modal -->
+    <div id="modal">
+        <div class="modal-close" onclick="closeModal()">✕ CLOSE</div>
+        <div class="modal-hero" id="m-hero"><h1 style="font-family:'Playfair Display'; font-size: clamp(2.5rem, 8vw, 5rem); position:relative; z-index:2; color:#fff;" id="m-title"></h1></div>
+        <div class="modal-body">
+            <p>打破二维平面的局限，将先锋的图形技术与深厚的商业逻辑深度融合。让每一次点击都成为感官的享受，让每一次设计都成为驱动商业增长的视觉引擎。</p>
+            <div class="modal-grid" id="m-grid"></div>
+        </div>
+    </div>
 
     <div class="content-layer">
         
-        <!-- ==================== 1. Galaxy 粒子首屏 ==================== -->
-        <section class="hero-section" id="hero-trigger">
-            <!-- 独立粒子画布 -->
-            <canvas id="galaxy-canvas"></canvas>
-            <div class="hero-content">
-                <h1 class="hero-title">Fann.</h1>
-                <div class="hero-subtitle">Visual & UI/UX Expert</div>
-                <div class="hero-desc">
-                    深耕视觉设计领域 9 年，打破传统二维平面的局限。<br>
-                    将先锋的图形技术与深厚的商业逻辑深度融合，让每一次设计都成为驱动商业增长的视觉引擎。<br>
-                    (请滑动鼠标 / 手指触摸背景互动)
+        <!-- 0. 首屏缩放 -->
+        <section class="hero-wrap">
+            <div class="hero-sticky">
+                <div class="hero-txt-center">
+                    <h1>Fann.</h1>
+                    <p style="color: var(--primary); letter-spacing: 8px; font-size: 1.2rem; margin-top: 20px;">VISUAL EXPERT</p>
+                </div>
+                <div class="hero-img-box" id="hero-img">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80">
+                </div>
+                <div class="hero-intro">
+                    <h2>Design is Logic.</h2>
+                    <p style="color: #a0aab5; line-height: 2; font-weight: 300;">深耕视觉与交互领域9年。打破传统二维平面的局限，将先锋的图形技术与深厚的商业逻辑深度融合。<br><br>让设计不仅仅是美学，更是驱动商业增长的引擎。</p>
                 </div>
             </div>
         </section>
 
-        <!-- ==================== 2. 完美弧形画廊 (Arc Carousel) ==================== -->
-        <div class="section-header" style="margin-top: 10svh;"><h2>01. Insights</h2><p>Swipe to Rotate</p></div>
-        <div class="arc-section swipe-zone" id="arc-trigger">
-            <div class="arc-container" id="arc-track">
-                <!-- 暖色调卡片，还原你截图的效果 -->
-                <div class="arc-card" onclick="openRichModal('视觉共振', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')">
-                    <h3>视觉共振</h3><p>"通过色彩与质感的深度碰撞，实现品牌价值的指数级传播。"</p>
-                </div>
-                <div class="arc-card" onclick="openRichModal('交互新生', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80')">
-                    <h3>交互新生</h3><p>"代码不仅是工具，更是赋予界面灵魂的画笔。"</p>
-                </div>
-                <div class="arc-card" onclick="openRichModal('极致造物', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80')">
-                    <h3>极致造物</h3><p>"平衡先锋创意美学与工业落地生产的可行性。"</p>
-                </div>
-                <div class="arc-card" onclick="openRichModal('万象共生', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')">
-                    <h3>万象共生</h3><p>"不止于单点输出，更着眼于全场景的生态统一。"</p>
-                </div>
-                <div class="arc-card" onclick="openRichModal('光影叙事', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')">
-                    <h3>光影叙事</h3><p>"用 3D 视角重塑用户的感官与认知边界。"</p>
-                </div>
-            </div>
-        </div>
+        <!-- 1. Arc Gallery -->
+        <div class="section-header"><h2>01. Insights</h2><p>Swipe to Explore</p></div>
+        <section class="arc-wrap">
+            <div class="arc-sticky" id="arc-container"></div>
+        </section>
 
-        <!-- ==================== 3. 空间飞入 ==================== -->
-        <div class="section-header" style="margin-top:5vh;"><h2>02. Dimension</h2><p>Parallax Fly-in</p></div>
-        <div class="features-section">
-            <div class="glass-panel panel-fly">
-                <h3 style="color: var(--primary);">打破平面的局限</h3>
-                <p>视觉面板不再是平铺于网页，而是伴随着滚动进度，从屏幕深处的 Z 轴空间带着柔和的阻尼直冲而出。</p>
-            </div>
-            <div class="glass-panel right panel-fly">
-                <h3 style="color: var(--primary);">次世代材质重构</h3>
-                <p>高级毛玻璃滤镜与底层光效的完美混合，透出顶尖设计师的专属拟物质感。</p>
-            </div>
-        </div>
+        <!-- 2. Flying Posters (OGL) -->
+        <div class="section-header"><h2>02. Dimension</h2><p>Click Any Poster</p></div>
+        <section class="posters-wrap">
+            <div class="posters-sticky" id="posters-canvas"></div>
+        </section>
 
-        <!-- ==================== 4. 轨道星环 ==================== -->
-        <div class="section-header"><h2>03. Orbit</h2><p>Horizontal Swipe</p></div>
-        <div class="orbital-section swipe-zone" id="orbital-trigger">
-            <div class="ring-wrapper">
-                <div class="ring" id="ring"></div>
+        <!-- 3. Glass Panels -->
+        <section class="glass-wrap">
+            <div class="glass-card glass-fly">
+                <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 20px;">极致交互</h3>
+                <p style="color: #aaa; line-height: 2;">不仅是界面的堆叠，更是对光影、材质与心理预期的精确把控。每一像素都承载着品牌温度与逻辑深度。</p>
             </div>
-        </div>
-
-        <!-- ==================== 5. 视差堆叠 ==================== -->
-        <div class="section-header"><h2>04. Stack</h2><p>Sticky Fold</p></div>
-        <div class="stack-section">
-            <div class="stack-card" onclick="openRichModal('夏日风暴', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'); z-index: 1;"><h3>01 / SUMMER</h3></div>
-            <div class="stack-card" onclick="openRichModal('霓虹界限', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80'); z-index: 2;"><h3>02 / NEON</h3></div>
-            <div class="stack-card" onclick="openRichModal('代码深渊', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'); z-index: 3;"><h3>03 / ABYSS</h3></div>
-        </div>
-
-        <!-- ==================== 6. Lanyard 物理甩动名片 ==================== -->
-        <div class="footer-section">
-            <div class="footer-text-bg">
-                <h1>DRIVE THE<br>GROWTH</h1>
+            <div class="glass-card glass-fly" style="margin-left: auto;">
+                <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 20px;">技术赋能</h3>
+                <p style="color: #aaa; line-height: 2;">从动效原型的构建到 WebGL 性能优化，我们打通了创意到落地的最后一公里，实现感官与数据的双重增长。</p>
             </div>
-            <div class="section-header" style="position:absolute; top: 5svh; z-index:0;"><h2>Connect</h2><p>DRAG TO SWING</p></div>
-            
-            <!-- 独立的 3D 物理画布 -->
+        </section>
+
+        <!-- 4. Orbital Ring -->
+        <div class="section-header"><h2>03. Orbit</h2><p>Infinite Loop</p></div>
+        <section class="ring-wrap">
+            <div class="ring-sticky"><div class="ring-container" id="ring-box"></div></div>
+        </section>
+
+        <!-- 5. Circular Gallery (New Project) -->
+        <div class="section-header"><h2>04. Distortion</h2><p>Curved Space</p></div>
+        <section class="circular-wrap">
+            <div class="circular-sticky" id="circular-canvas"></div>
+        </section>
+
+        <!-- 6. Stack -->
+        <div class="section-header"><h2>05. Projects</h2><p>Sticky Perspective</p></div>
+        <section class="stack-wrap" id="stack-container"></section>
+
+        <!-- 7. Lanyard Footer -->
+        <footer class="footer-wrap">
+            <div class="footer-bg-txt">DRIVE<br>GROWTH</div>
+            <div class="section-header" style="position: absolute; top: 5svh; z-index: 0;" id="connect-anchor">
+                <h2>Connect</h2><p>Drag My Card</p>
+            </div>
             <canvas id="lanyard-canvas"></canvas>
-        </div>
-
-    </div>
-
-    <!-- ==================== 沉浸式详情页 Modal ==================== -->
-    <div id="unfold-modal">
-        <div class="modal-close-btn" onclick="closeModal()">✕ CLOSE</div>
-        <div class="modal-hero" id="modal-hero">
-            <h1 class="modal-title-huge" id="modal-title">TITLE</h1>
-        </div>
-        <div class="modal-body">
-            <p class="modal-desc-text">
-                这是一个完美适配 iPhone 的沉浸式多图详情页。<br><br>
-                你可以像浏览原生 App 一样向下滑动。采用动态视口高度 (svh) 计算，文字比例通过 clamp 函数自动响应流式布局，排版细腻高级，无任何溢出或卡顿。底部的多图阵列在移动端会自动转化为舒适的单列大图瀑布流。
-            </p>
-            <div class="modal-gallery">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Detail Image">
-                <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80" alt="Detail Image">
-                <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80" alt="Detail Image">
+            <!-- 3D 卡片上的高清 HTML 悬浮层 -->
+            <div id="html-label">
+                <h3 style="margin: 0 0 10px 0; font-size: clamp(16px, 4vw, 24px); font-weight: 800;">FANN</h3>
+                <p style="margin: 4px 0; font-size: clamp(12px, 2.5vw, 16px); font-weight: 600;">hello@fann.design</p>
+                <p style="margin: 4px 0; font-size: clamp(12px, 2.5vw, 16px); font-weight: bold; color: #d4af37;">+86 138 0000 0000</p>
             </div>
-        </div>
+        </footer>
     </div>
 
-    <!-- 核心库 -->
+    <!-- 脚本依赖 -->
     <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
 
-    <script>
-        const isMobile = window.innerWidth <= 768;
+    <script type="module">
+        import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture, Triangle, Raycast, Vec2 } from 'https://unpkg.com/ogl';
 
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = 0;
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    initGalaxyShader();
-                    initGSAPAnimations();   
-                    initPhysicsLanyard(); // 启动结尾的 3D 物理绳索工牌
-                }, 800);
-            }, 1000);
+        gsap.registerPlugin(ScrollTrigger);
+        const isMobile = window.innerWidth < 768;
+
+        const globalImages =[
+            "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800",
+            "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=800"
+        ];
+
+        // ==========================================
+        // Modal 全局逻辑
+        // ==========================================
+        window.openModal = (title, img) => {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-hero').style.backgroundImage = `url(${img})`;
+            document.getElementById('m-grid').innerHTML = globalImages.slice(0, 3).map(src => `<img src="${src}">`).join('');
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+        window.closeModal = () => {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = '';
         };
 
-        // =========================================
-        // 🌟 1. WebGL Galaxy 着色器特效 (完美还原排斥效果)
-        // =========================================
-        function initGalaxyShader() {
-            const canvas = document.getElementById('galaxy-canvas');
-            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.z = 20;
-
-            const particleCount = isMobile ? 3000 : 8000;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const sizes = new Float32Array(particleCount);
-
-            for(let i=0; i<particleCount; i++) {
-                positions[i*3] = (Math.random() - 0.5) * 40;
-                positions[i*3+1] = (Math.random() - 0.5) * 40;
-                positions[i*3+2] = (Math.random() - 0.5) * 20 - 10;
-                sizes[i] = Math.random();
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-
-            // 手写 Shader：鼠标排斥 + 星光闪烁
-            const material = new THREE.ShaderMaterial({
-                uniforms: {
-                    uTime: { value: 0 },
-                    uMouse: { value: new THREE.Vector2(0, 0) },
-                    uColor: { value: new THREE.Color('#d4af37') }
-                },
-                vertexShader: `
-                    uniform float uTime;
-                    uniform vec2 uMouse;
-                    attribute float aSize;
-                    varying float vAlpha;
+        // ==========================================
+        // 0. Galaxy Background (OGL)
+        // ==========================================
+        function initGalaxy() {
+            const renderer = new Renderer({ alpha: true });
+            const gl = renderer.gl;
+            document.getElementById('galaxy-bg').appendChild(gl.canvas);
+            const program = new Program(gl, {
+                vertex: `attribute vec2 uv; attribute vec2 position; varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 0, 1); }`,
+                fragment: `
+                    precision highp float; uniform float uTime; uniform vec2 uRes; uniform vec2 uMouse; varying vec2 vUv;
+                    float hash(vec2 p) { p = fract(p*vec2(123.34, 456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
                     void main() {
-                        vec3 pos = position;
-                        // 缓慢公转
-                        float angle = uTime * 0.05;
-                        mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-                        pos.xy = rot * pos.xy;
-                        
-                        // 鼠标排斥计算
-                        vec2 screenPos = pos.xy;
-                        float dist = length(screenPos - uMouse * 20.0);
-                        if(dist < 5.0) {
-                            vec2 push = normalize(screenPos - uMouse * 20.0) * (5.0 - dist) * 0.5;
-                            pos.xy += push;
+                        vec2 uv = (vUv - 0.5) * (uRes.x/uRes.y) + (uMouse - 0.5) * 0.05;
+                        vec3 col = vec3(0);
+                        for(float i=0.; i<3.; i++){
+                            float d = fract(i*0.33 + uTime*0.02);
+                            float s = mix(15., 0.5, d);
+                            vec2 g = fract(uv * s) - 0.5;
+                            float n = hash(floor(uv * s));
+                            col += (0.005 / length(g - vec2(n-0.5, fract(n*10.)-0.5))) * d * smoothstep(1., 0.8, d) * vec3(n, 0.6, 1.);
                         }
-                        
-                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                        gl_PointSize = aSize * (30.0 / -mvPosition.z);
-                        gl_Position = projectionMatrix * mvPosition;
-                        vAlpha = 0.3 + sin(uTime * 2.0 + aSize * 10.0) * 0.3;
+                        gl_FragColor = vec4(col, 1.0);
                     }
                 `,
-                fragmentShader: `
-                    uniform vec3 uColor;
-                    varying float vAlpha;
-                    void main() {
-                        float d = length(gl_PointCoord - vec2(0.5));
-                        if(d > 0.5) discard;
-                        gl_FragColor = vec4(uColor, (0.5 - d) * 2.0 * vAlpha);
-                    }
-                `,
-                transparent: true,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false
+                uniforms: { uTime: { value: 0 }, uRes: { value: [innerWidth, innerHeight] }, uMouse: { value:[0.5, 0.5] } }
             });
-
-            const particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-
-            // 鼠标/触控追踪
-            let mouseX = 0, mouseY = 0;
-            const updateMouse = (clientX, clientY) => {
-                mouseX = (clientX / window.innerWidth) * 2 - 1;
-                mouseY = -(clientY / window.innerHeight) * 2 + 1;
-            };
-            window.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
-            window.addEventListener('touchmove', e => updateMouse(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-
-            const clock = new THREE.Clock();
-            function animate() {
-                requestAnimationFrame(animate);
-                material.uniforms.uTime.value = clock.getElapsedTime();
-                // 缓动追随
-                material.uniforms.uMouse.value.x += (mouseX - material.uniforms.uMouse.value.x) * 0.05;
-                material.uniforms.uMouse.value.y += (mouseY - material.uniforms.uMouse.value.y) * 0.05;
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
+            let mx=0.5, my=0.5; window.addEventListener('mousemove', e => { mx=e.clientX/innerWidth; my=1-e.clientY/innerHeight; });
+            requestAnimationFrame(function update(t) {
+                program.uniforms.uTime.value = t * 0.001;
+                program.uniforms.uMouse.value[0] += (mx - program.uniforms.uMouse.value[0]) * 0.05;
+                program.uniforms.uMouse.value[1] += (my - program.uniforms.uMouse.value[1]) * 0.05;
+                renderer.render({ scene: mesh }); requestAnimationFrame(update);
+            });
+            window.addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); program.uniforms.uRes.value = [innerWidth, innerHeight]; });
+            renderer.setSize(innerWidth, innerHeight);
         }
 
-        // =========================================
-        // 🌟 2. 核心动画引擎与横向滑动转换
-        // =========================================
-        function initGSAPAnimations() {
-            gsap.registerPlugin(ScrollTrigger);
+        // ==========================================
+        // 首屏收缩动画
+        // ==========================================
+        function initHero() {
+            const tl = gsap.timeline({ scrollTrigger: { trigger: ".hero-wrap", start: "top top", end: "+=150%", scrub: 1, pin: true }});
+            tl.to(".hero-txt-center", { opacity: 0, scale: 0.8, duration: 0.5 }, 0)
+              .to(".hero-img-box", { width: isMobile ? "80vw" : "30vw", height: isMobile ? "40vh" : "55vh", x: isMobile ? "0" : "-20vw", y: isMobile ? "-20vh" : "-10vh", borderRadius: "24px", duration: 1, ease: "power2.inOut" }, 0)
+              .to(".hero-intro", { opacity: 1, x: isMobile ? "0" : "15vw", y: isMobile ? "15vh" : "-5vh", duration: 0.8 }, 0.4);
+        }
 
-            // 【核心】全向滑动转换 (左右滑 = 上下滚)
-            document.querySelectorAll('.swipe-zone').forEach(zone => {
-                let startX = 0, startY = 0;
-                zone.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
-                zone.addEventListener('touchmove', e => {
-                    if (!startX) return;
-                    const dx = startX - e.touches[0].clientX; const dy = startY - e.touches[0].clientY;
-                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 3) {
-                        if (e.cancelable) e.preventDefault();
-                        window.scrollBy({ top: dx * 1.5, behavior: 'instant' });
-                        startX = e.touches[0].clientX; 
-                    }
-                }, { passive: false });
+        // ==========================================
+        // 1. Arc Gallery & Stack
+        // ==========================================
+        function initDOMProjects() {
+            const arcTitles = ["秩序", "共鸣", "突破", "新生"];
+            const arcBox = document.getElementById('arc-container');
+            arcTitles.forEach((t, i) => {
+                const card = document.createElement('div'); card.className = 'arc-card';
+                card.innerHTML = `<img src="${globalImages[i]}"><div class="arc-info"><h3 style="font-size:1.5rem; font-family:'Playfair Display'; margin-bottom:10px;">${t}</h3><p style="color:#666;">深度重构视觉语言，用设计驱动商业</p></div>`;
+                card.onclick = () => window.openModal(`Project: ${t}`, globalImages[i]);
+                arcBox.appendChild(card);
             });
-
-            // 【重构核心】Project 1: Arc Carousel (完美弧形)
             const cards = document.querySelectorAll('.arc-card');
-            const totalCards = cards.length; // 5
-            
-            ScrollTrigger.create({
-                trigger: "#arc-trigger", start: "center center", end: "+=2000", pin: true, scrub: 0.8,
-                onUpdate: (self) => {
-                    const activeIndex = self.progress * (totalCards - 1);
-                    cards.forEach((card, i) => {
-                        const offset = i - activeIndex; 
-                        const absOffset = Math.abs(offset);
-                        
-                        // 【弧形数学模型】
-                        const x = offset * (isMobile ? 55 : 35); // X轴散开幅度
-                        const z = -Math.pow(absOffset, 1.5) * (isMobile ? 100 : 150); // Z轴弧度后退
-                        const rotateY = -offset * (isMobile ? 25 : 20); // 侧向倾斜
-                        
-                        const scale = Math.max(0.6, 1 - absOffset * 0.15);
-                        
-                        if(absOffset < 0.5) card.classList.add('active'); else card.classList.remove('active');
-
-                        card.style.transform = `translate(-50%, -50%) translateX(${x}vw) translateZ(${z}px) rotateY(${rotateY}deg) scale(${scale})`;
-                        card.style.zIndex = 100 - Math.round(absOffset * 10);
+            gsap.to(cards, { scrollTrigger: { trigger: ".arc-wrap", start: "top top", end: "bottom bottom", scrub: 0.5 },
+                onUpdate: function() {
+                    const p = this.progress();
+                    cards.forEach((c, i) => {
+                        const off = i - p * (cards.length - 1);
+                        c.style.transform = `translateX(${off * 45}vw) translateZ(${-Math.abs(off)*200}px) rotateY(${-off * 30}deg)`;
+                        c.style.opacity = 1 - Math.abs(off) * 0.5;
                     });
                 }
             });
 
-            // Project 2: Z-Shatter
-            gsap.utils.toArray('.panel-fly').forEach(panel => {
-                gsap.fromTo(panel, { z: -300, y: 100, rotationX: 15, opacity: 0 }, { z: 0, y: 0, rotationX: 0, opacity: 1, scrollTrigger: { trigger: panel, start: "top 95%", end: "top 60%", scrub: 1 } });
+            // 4. Orbit
+            const ringBox = document.getElementById('ring-box');
+            globalImages.forEach((src, i) => {
+                const el = document.createElement('div'); el.className = 'ring-item';
+                el.style.backgroundImage = `url(${src})`; el.style.transform = `rotateY(${i * 72}deg) translateZ(300px)`;
+                el.onclick = () => window.openModal("Orbit Ring", src); ringBox.appendChild(el);
             });
+            gsap.to(ringBox, { rotateY: 360, scrollTrigger: { trigger: ".ring-wrap", start: "top top", end: "bottom bottom", scrub: 1 }});
 
-            // Project 4: Orbital Ring 
-            const ring = document.getElementById('ring');
-            const ringSrcs =['https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80'];
+            // 6. Stack
+            const stackBox = document.getElementById('stack-container');
+            globalImages.slice(0,3).forEach((src, i) => {
+                const el = document.createElement('div'); el.className = 'stack-card';
+                el.style.backgroundImage = `url(${src})`; el.innerHTML = `<h3>Perspective 0${i+1}</h3>`;
+                el.onclick = () => window.openModal(`Perspective 0${i+1}`, src); stackBox.appendChild(el);
+            });
+        }
+
+        // ==========================================
+        // 2. Flying Posters (OGL w/ Raycast)
+        // ==========================================
+        function initFlyingPosters() {
+            const container = document.getElementById('posters-canvas');
+            const renderer = new Renderer({ alpha: true }); const gl = renderer.gl; container.appendChild(gl.canvas);
+            const camera = new Camera(gl, { fov: 45 }); camera.position.z = 20; const scene = new Transform();
+            const geo = new Plane(gl, { width: 8, height: 10, widthSegments: 20 });
             
-            const ringZ = isMobile ? window.innerWidth * 0.45 : 350; 
-            ringSrcs.forEach((src, i) => {
-                const card = document.createElement('div'); card.className = 'ring-card';
-                card.style.backgroundImage = `url('${src}')`; card.onclick = () => openRichModal('星环轨道', src);
-                card.style.transform = `rotateY(${i * 60}deg) translateZ(${ringZ}px)`; ring.appendChild(card);
+            const meshes = globalImages.slice(0, 4).map((src, i) => {
+                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = src; img.onload = () => tex.image = img;
+                const program = new Program(gl, {
+                    vertex: `attribute vec3 position; attribute vec2 uv; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; uniform float uPos; varying vec2 vUv;
+                        mat4 rotY(float a) { float s=sin(a), c=cos(a), oc=1.-c; return mat4(oc*0.+c, 0., -s, 0., 0., c, 0., 0., s, 0., oc*0.+c, 0., 0., 0., 0., 1.); }
+                        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * rotY(clamp(uPos*5.,0.,3.14)) * vec4(position, 1.0); }`,
+                    fragment: `precision highp float; uniform sampler2D tMap; varying vec2 vUv; void main() { gl_FragColor = texture2D(tMap, vUv); }`,
+                    uniforms: { tMap: { value: tex }, uPos: { value: 0 } }, cullFace: false
+                });
+                const mesh = new Mesh(gl, { geometry: geo, program });
+                mesh.position.y = i * 15; mesh.setParent(scene);
+                mesh.userData = { src, title: `Poster 0${i+1}` }; // 存数据供点击
+                return mesh;
             });
-            gsap.to(ring, { rotationY: -360, ease: "none", scrollTrigger: { trigger: "#orbital-trigger", start: "top top", end: "bottom bottom", scrub: 1 }});
 
-            // Project 5: Parallax Stack 
-            const stackCards = gsap.utils.toArray('.stack-card');
-            stackCards.forEach((card, i) => {
-                if(i < stackCards.length - 1) {
-                    gsap.to(card, { scale: 0.92, opacity: 0.4, ease: "none", scrollTrigger: { trigger: card, start: "top 12%", end: "+=100%", scrub: 1 } });
+            const raycast = new Raycast(gl); const mouse = new Vec2();
+            container.addEventListener('click', e => {
+                const rect = container.getBoundingClientRect();
+                mouse.set(2 * (e.clientX - rect.left) / rect.width - 1, 2 * (rect.top - e.clientY) / rect.height + 1);
+                raycast.castMouse(camera, mouse);
+                const hits = raycast.intersectBounds(meshes);
+                if (hits.length) window.openModal(hits[0].userData.title, hits[0].userData.src);
+            });
+
+            gsap.to({}, { scrollTrigger: { trigger: ".posters-wrap", start: "top top", end: "bottom bottom", scrub: true },
+                onUpdate: function() {
+                    const p = this.progress(); const totalH = meshes.length * 15;
+                    meshes.forEach((m, i) => {
+                        let y = (i * 15 - p * totalH * 1.5) % totalH;
+                        if (y < -totalH/2) y += totalH;
+                        m.position.y = y; m.program.uniforms.uPos.value = Math.abs(y) / 10;
+                    });
                 }
             });
 
-            setTimeout(() => ScrollTrigger.refresh(), 500);
+            function resize() { renderer.setSize(container.offsetWidth, container.offsetHeight); camera.perspective({ aspect: gl.canvas.width / gl.canvas.height }); }
+            window.addEventListener('resize', resize); resize();
+            requestAnimationFrame(function update() { renderer.render({ scene, camera }); requestAnimationFrame(update); });
         }
 
-        // =========================================
-        // 🌟 3. Vanilla 物理引擎工牌 (Lanyard 复刻)
-        // 纯靠 Math 与 Canvas 绘制，0 外部模型依赖
-        // =========================================
-        function initPhysicsLanyard() {
+        // ==========================================
+        // 5. Circular Gallery (OGL w/ Raycast)
+        // ==========================================
+        function initCircularGallery() {
+            const container = document.getElementById('circular-canvas');
+            const renderer = new Renderer({ alpha: true }); const gl = renderer.gl; container.appendChild(gl.canvas);
+            const camera = new Camera(gl, { fov: 45 }); camera.position.z = 20; const scene = new Transform();
+            const geo = new Plane(gl, { widthSegments: 50, heightSegments: 1 });
+
+            let viewport = { width: 0, height: 0 };
+            
+            const meshes = globalImages.map((src, index) => {
+                const tex = new Texture(gl); const img = new Image(); img.crossOrigin = "anonymous"; img.src = src; img.onload = () => tex.image = img;
+                const program = new Program(gl, {
+                    vertex: `attribute vec3 position; attribute vec2 uv; uniform mat4 modelViewMatrix; uniform mat4 projectionMatrix; uniform float uTime, uSpeed; varying vec2 vUv;
+                        void main() { vUv = uv; vec3 p = position; p.z = (sin(p.x*4.+uTime)*1.5 + cos(p.y*2.+uTime)*1.5) * (0.1+uSpeed*0.5);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`,
+                    fragment: `precision highp float; uniform sampler2D tMap; varying vec2 vUv; void main() { gl_FragColor = texture2D(tMap, vUv); }`,
+                    uniforms: { tMap: { value: tex }, uTime: { value: Math.random()*100 }, uSpeed: { value: 0 } }, transparent: true
+                });
+                const mesh = new Mesh(gl, { geometry: geo, program }); mesh.setParent(scene);
+                mesh.userData = { index, src, title: `Distortion ${index+1}` };
+                return mesh;
+            });
+
+            const raycast = new Raycast(gl); const mouse = new Vec2();
+            container.addEventListener('click', e => {
+                const rect = container.getBoundingClientRect();
+                mouse.set(2 * (e.clientX - rect.left) / rect.width - 1, 2 * (rect.top - e.clientY) / rect.height + 1);
+                raycast.castMouse(camera, mouse);
+                const hits = raycast.intersectBounds(meshes);
+                if (hits.length) window.openModal(hits[0].userData.title, hits[0].userData.src);
+            });
+
+            let currentScroll = 0;
+            gsap.to({}, { scrollTrigger: { trigger: ".circular-wrap", start: "top top", end: "bottom bottom", scrub: true },
+                onUpdate: function() { currentScroll = this.progress() * (meshes.length * 8); }
+            });
+
+            function resize() {
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+                camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+                const fov = camera.fov * Math.PI / 180; viewport.height = 2 * Math.tan(fov / 2) * camera.position.z; viewport.width = viewport.height * camera.aspect;
+                const scale = container.offsetHeight / 1500;
+                meshes.forEach(m => { m.scale.x = viewport.width * (700 * scale) / container.offsetWidth; m.scale.y = viewport.height * (900 * scale) / container.offsetHeight; });
+            }
+            window.addEventListener('resize', resize); resize();
+
+            let lastScroll = 0;
+            requestAnimationFrame(function update() {
+                const speed = currentScroll - lastScroll; lastScroll = currentScroll;
+                const width = meshes[0].scale.x + 2; const total = width * meshes.length;
+                
+                meshes.forEach((m, i) => {
+                    let x = (width * i) - currentScroll;
+                    // Infinite loop logic
+                    while (x < -total/2) x += total; while (x > total/2) x -= total;
+                    m.position.x = x;
+                    
+                    // Bending math
+                    const H = viewport.width / 2; const bend = 3; const R = (H*H + bend*bend)/(2*bend);
+                    const effX = Math.min(Math.abs(x), H); const arc = R - Math.sqrt(R*R - effX*effX);
+                    m.position.y = -arc; m.rotation.z = -Math.sign(x) * Math.asin(effX/R);
+                    
+                    m.program.uniforms.uTime.value += 0.04;
+                    m.program.uniforms.uSpeed.value = Math.abs(speed)*10;
+                });
+                renderer.render({ scene, camera }); requestAnimationFrame(update);
+            });
+        }
+
+        // ==========================================
+        // 7. Lanyard (Vanilla Three.js + Physics)
+        // ==========================================
+        function initLanyard() {
             const canvas = document.getElementById('lanyard-canvas');
-            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
+            const htmlLabel = document.getElementById('html-label');
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.z = isMobile ? 25 : 18;
+            const camera = new THREE.PerspectiveCamera(30, innerWidth/innerHeight, 0.1, 100);
+            camera.position.z = 30;
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setSize(innerWidth, innerHeight);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-            dirLight.position.set(5, 5, 5);
-            scene.add(dirLight);
+            // 光照
+            scene.add(new THREE.AmbientLight(0xffffff, 1));
+            const dir = new THREE.DirectionalLight(0xffffff, 2); dir.position.set(5, 5, 10); scene.add(dir);
 
-            // 构建 3D 卡片 (Box)
-            const cardGroup = new THREE.Group();
+            // 卡片组 (放大 scale)
+            const group = new THREE.Group();
+            const tex = new THREE.TextureLoader().load(globalImages[0]);
+            const cardGeo = new THREE.BoxGeometry(3, 4.5, 0.1); // Scale magnified
+            const cardMat = new THREE.MeshPhysicalMaterial({ map: tex, metalness: 0.1, roughness: 0.5, clearcoat: 0.5 });
+            const card = new THREE.Mesh(cardGeo, cardMat);
             
-            // 绘制带有你信息的 Canvas 贴图
-            const texCanvas = document.createElement('canvas');
-            texCanvas.width = 512; texCanvas.height = 768;
-            const ctx = texCanvas.getContext('2d');
-            ctx.fillStyle = '#f2efe9'; ctx.fillRect(0,0,512,768);
-            ctx.fillStyle = '#d4af37'; ctx.font = 'bold 60px "Playfair Display"'; ctx.textAlign = 'center';
-            ctx.fillText('FANN', 256, 300);
-            ctx.fillStyle = '#333'; ctx.font = '30px "Noto Sans SC"';
-            ctx.fillText('VISUAL EXPERT', 256, 380);
-            ctx.fillText('hello@fann.design', 256, 450);
-            
-            const cardTex = new THREE.CanvasTexture(texCanvas);
-            const cardGeo = new THREE.BoxGeometry(4.5, 6.5, 0.1);
-            const cardMat = new THREE.MeshStandardMaterial({ map: cardTex, roughness: 0.2, metalness: 0.1 });
-            const cardMesh = new THREE.Mesh(cardGeo, cardMat);
-            cardMesh.position.y = -3.25; // 挂点在顶部
-            cardGroup.add(cardMesh);
-            
-            // 顶部的金属夹子
+            // 顶端金属夹
             const clipGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16);
             const clipMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.2 });
-            const clipMesh = new THREE.Mesh(clipGeo, clipMat);
-            clipMesh.rotation.z = Math.PI / 2;
-            cardGroup.add(clipMesh);
+            const clip = new THREE.Mesh(clipGeo, clipMat); clip.rotation.z = Math.PI/2; clip.position.y = 2.4;
+            
+            group.add(card); group.add(clip); scene.add(group);
 
-            scene.add(cardGroup);
-
-            // 绘制挂绳 (Line)
-            const lineMat = new THREE.LineBasicMaterial({ color: 0xd4af37, linewidth: 2 });
+            // Verlet 绳子物理
+            const numNodes = 10;
+            const nodes =[]; const linkLen = 0.8;
+            for(let i=0; i<numNodes; i++) nodes.push({ pos: new THREE.Vector3(0, 10 - i*linkLen, 0), old: new THREE.Vector3(0, 10 - i*linkLen, 0) });
+            
+            // 绳子渲染
             const lineGeo = new THREE.BufferGeometry();
-            const line = new THREE.Line(lineGeo, lineMat);
-            scene.add(line);
+            const posArray = new Float32Array(numNodes * 3);
+            lineGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+            const line = new THREE.Line(lineGeo, lineMat); scene.add(line);
 
-            // === 弹簧物理算法 (Spring Physics) ===
-            const pivot = new THREE.Vector3(0, 10, 0); // 绳子悬挂点
-            let cardPos = new THREE.Vector3(0, 2, 0);
-            let cardVel = new THREE.Vector3(0, 0, 0);
-            const gravity = new THREE.Vector3(0, -0.05, 0);
-            const springForce = 0.15;
-            const friction = 0.92;
-            const stringLength = 8;
-
-            let isDragging = false;
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2();
-            const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-
-            // 事件绑定
-            const onDown = (clientX, clientY) => {
-                mouse.x = (clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+            // 交互
+            let isDragging = false; const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+            let dragOffset = new THREE.Vector3(); const dragPlane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+            
+            const onDown = e => {
+                const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
+                mouse.set(2*(x/innerWidth)-1, -2*(y/innerHeight)+1);
                 raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObject(cardMesh);
-                if (intersects.length > 0) {
-                    isDragging = true;
-                    document.body.style.cursor = 'grabbing';
+                const hits = raycaster.intersectObject(card);
+                if(hits.length) { 
+                    isDragging = true; 
+                    if(e.cancelable) e.preventDefault(); // 只在点中卡片时阻止滚动
+                    document.body.style.cursor = "grabbing"; 
                 }
             };
-            const onMove = (clientX, clientY) => {
+            const onMove = e => {
                 if(!isDragging) return;
-                mouse.x = (clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+                const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY;
+                mouse.set(2*(x/innerWidth)-1, -2*(y/innerHeight)+1);
                 raycaster.setFromCamera(mouse, camera);
-                const target = new THREE.Vector3();
-                raycaster.ray.intersectPlane(dragPlane, target);
-                // 直接设定位置
-                cardPos.copy(target);
-                cardPos.y += 3.25; // 偏移点击点
-                cardVel.set(0,0,0);
+                raycaster.ray.intersectPlane(dragPlane, dragOffset);
+                if(e.cancelable) e.preventDefault();
             };
-            const onUp = () => { 
-                if(isDragging) {
-                    isDragging = false; 
-                    document.body.style.cursor = 'auto';
-                    // 触发复制邮箱
-                    const toast = document.getElementById('toast'); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
-                }
-            };
+            const onUp = () => { isDragging = false; document.body.style.cursor = "auto"; };
 
-            canvas.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
-            canvas.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
-            window.addEventListener('mouseup', onUp);
-            canvas.addEventListener('touchstart', e => onDown(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-            canvas.addEventListener('touchmove', e => onMove(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-            window.addEventListener('touchend', onUp);
+            canvas.addEventListener('mousedown', onDown); canvas.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+            canvas.addEventListener('touchstart', onDown, {passive:false}); canvas.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onUp);
 
-            function animate() {
-                requestAnimationFrame(animate);
+            // 锚点 (Connect 标题位置映射)
+            const anchor = new THREE.Vector3(0, 12, 0); 
+            
+            function updatePhysics() {
+                // 重力 & 拖拽
+                nodes.forEach((n, i) => {
+                    if (i === 0) { n.pos.copy(anchor); return; } // 锚点固定
+                    if (i === numNodes-1 && isDragging) { 
+                        n.pos.lerp(dragOffset, 0.2); // 手动拖拽末端
+                    } else {
+                        const vel = n.pos.clone().sub(n.old).multiplyScalar(0.98); // 阻尼
+                        n.old.copy(n.pos);
+                        n.pos.add(vel).add(new THREE.Vector3(0, -0.05, 0)); // 重力
+                    }
+                });
                 
-                if(!isDragging) {
-                    // 钟摆物理计算
-                    const force = new THREE.Vector3().subVectors(pivot, cardPos);
-                    const dist = force.length();
-                    force.normalize().multiplyScalar((dist - stringLength) * springForce);
-                    
-                    cardVel.add(force);
-                    cardVel.add(gravity);
-                    cardVel.multiplyScalar(friction);
-                    cardPos.add(cardVel);
+                // 约束计算 (多次迭代稳定)
+                for(let iter=0; iter<5; iter++) {
+                    for(let i=0; i<numNodes-1; i++) {
+                        const n1 = nodes[i], n2 = nodes[i+1];
+                        const diff = n2.pos.clone().sub(n1.pos);
+                        const dist = diff.length();
+                        const err = (dist - linkLen) * 0.5;
+                        diff.normalize().multiplyScalar(err);
+                        if(i !== 0) n1.pos.add(diff);
+                        if(!isDragging || i+1 !== numNodes-1) n2.pos.sub(diff);
+                    }
                 }
 
-                cardGroup.position.copy(cardPos);
-                
-                // 计算卡片自转，让它总是自然垂直下垂
-                const angleZ = Math.atan2(cardPos.x - pivot.x, pivot.y - cardPos.y);
-                const angleX = Math.atan2(cardPos.z - pivot.z, pivot.y - cardPos.y);
-                // 加入速度产生的额外微晃
-                cardGroup.rotation.z = angleZ - cardVel.x * 0.1;
-                cardGroup.rotation.x = angleX + cardVel.z * 0.1;
-                cardGroup.rotation.y = cardVel.x * 0.1;
+                // 更新绳子和卡片 Mesh
+                const endNode = nodes[numNodes-1];
+                const prevNode = nodes[numNodes-2];
+                group.position.copy(endNode.pos);
+                // 根据倒数第二个点计算下垂角度
+                group.rotation.z = Math.atan2(endNode.pos.x - prevNode.pos.x, prevNode.pos.y - endNode.pos.y);
+                // X 轴自然摆动
+                group.rotation.x = (endNode.pos.z - endNode.old.z) * 0.2;
 
-                // 更新绳子点位
-                lineGeo.setFromPoints([pivot, cardPos]);
+                // 更新绳子线条
+                nodes.forEach((n, i) => { posArray[i*3]=n.pos.x; posArray[i*3+1]=n.pos.y; posArray[i*3+2]=n.pos.z; });
+                lineGeo.attributes.position.needsUpdate = true;
+
+                // 同步 HTML 标签位置，保证文字绝对清晰
+                const screenVec = endNode.pos.clone().project(camera);
+                const x = (screenVec.x * .5 + .5) * innerWidth;
+                const y = (-(screenVec.y * .5) + .5) * innerHeight;
+                htmlLabel.style.left = `${x}px`;
+                htmlLabel.style.top = `${y}px`;
+                htmlLabel.style.opacity = 1;
 
                 renderer.render(scene, camera);
+                requestAnimationFrame(updatePhysics);
             }
-            animate();
-
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            updatePhysics();
+            window.addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
         }
 
         // ==========================================
-        // 🌟 详情页 Modal 逻辑 
+        // 启动
         // ==========================================
-        const modal = document.getElementById('unfold-modal');
-        const modalHero = document.getElementById('modal-hero');
-        const modalTitle = document.getElementById('modal-title');
-
-        window.openRichModal = function(title, imgSrc) {
-            modalTitle.innerText = title;
-            modalHero.style.backgroundImage = `url('${imgSrc}')`;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; 
-            modal.scrollTop = 0; 
-        };
-
-        window.closeModal = function() {
-            modal.classList.remove('active');
-            document.body.style.overflow = ''; 
+        window.onload = () => {
+            initGalaxy();
+            initHero();
+            initDOMProjects();
+            initFlyingPosters();
+            initCircularGallery();
+            initLanyard();
+            gsap.to(".glass-fly", { opacity: 1, z: 0, stagger: 0.2, scrollTrigger: { trigger: ".glass-wrap", start: "top 80%", end: "bottom bottom", scrub: true }});
+            setTimeout(() => document.getElementById('loader').style.opacity = 0, 1000);
+            setTimeout(() => document.getElementById('loader').remove(), 1800);
         };
     </script>
 </body>
